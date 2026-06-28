@@ -8,14 +8,16 @@
     "build": "webpack --mode production",
     "watch": "webpack --watch --mode development",
     "test": "node src/content/detector.test.mjs",
-    "lint": "eslint src --ext .js",
+    "lint": "eslint src",
     "lint:ext": "web-ext lint --source-dir dist",
     "start:chrome": "web-ext run -t chromium --source-dir dist",
     "format": "prettier --write \"src/**/*.{js,css,html}\""
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "copy-webpack-plugin": "^12.0.2",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.4",
+    "globals": "^17.7.0",
     "prettier": "^3.3.3",
     "web-ext": "^8.2.0",
     "webpack": "^5.94.0",

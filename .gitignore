@@ -9,6 +9,9 @@ web-ext-artifacts/
 .env
 .env.*
 
+# Planning docs (kept local, not part of the shipped repo)
+/Plans/
+
 # OS / editor
 .DS_Store
 *.log

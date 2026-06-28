@@ -10,7 +10,6 @@ import {
   shannonEntropy,
   luhnValid,
   mask,
-  CATEGORY,
 } from './detector.js';
 import { debounce } from '../shared/debounce.js';
 
