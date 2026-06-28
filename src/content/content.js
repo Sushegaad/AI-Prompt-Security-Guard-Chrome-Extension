@@ -221,6 +221,9 @@ function attach() {
   badge = createBadge(anchor);
   el.addEventListener('input', boundInputListener);
   runScan();
+  console.info(
+    `[AI Safety Guard] bound to input <${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}> on ${location.host}`
+  );
 }
 
 /* ----------------------- file attachment scanning ----------------------- */
@@ -288,21 +291,55 @@ async function onAttach(files) {
   }
 }
 
+let started = false;
 function start() {
-  loadFonts(); // register embedded fonts CSP-safely (async, fire-and-forget)
-  attachInterceptors();
-  initAttachWatcher(onAttach, fileScanEnabled);
-  attach();
-  // SPA pages mutate the DOM continuously while streaming answers — debounce the
-  // re-attach check so we don't run it on every mutation batch.
-  const recheck = debounce(() => {
-    if (!inputEl || !document.contains(inputEl)) attach();
-  }, 250);
-  const observer = new MutationObserver(recheck);
-  observer.observe(document.body, { childList: true, subtree: true });
+  if (started) return;
+  started = true;
+  try {
+    console.info(`[AI Safety Guard] content script active on ${location.host} (adapter: ${adapter.id})`);
+    loadFonts(); // register embedded fonts CSP-safely (async, fire-and-forget)
+    attachInterceptors();
+    initAttachWatcher(onAttach, fileScanEnabled);
+    attach();
+    // SPA pages mutate the DOM continuously while streaming answers — debounce the
+    // re-attach check so we don't run it on every mutation batch.
+    const recheck = debounce(() => {
+      if (!inputEl || !document.contains(inputEl)) attach();
+    }, 250);
+    const observer = new MutationObserver(recheck);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // Diagnostic: if we still haven't found the input after the SPA settles,
+    // say so loudly with what IS on the page — the first thing to check when a
+    // site changes its DOM (or hides the composer in a closed shadow root).
+    setTimeout(() => {
+      if (!inputEl) {
+        const ce = document.querySelectorAll('[contenteditable="true"]').length;
+        const ta = document.querySelectorAll('textarea').length;
+        console.warn(
+          `[AI Safety Guard] no input box found on ${location.host} after 4s ` +
+            `(contenteditable=${ce}, textarea=${ta}). The site's selectors may have changed, ` +
+            `or the composer is in a closed shadow root we can't reach.`
+        );
+      }
+    }, 4000);
+  } catch (e) {
+    console.error('[AI Safety Guard] failed to start', e);
+  }
 }
 
-loadSettings().finally(() => {
+// Initialize immediately (does NOT wait on the settings round-trip, so a slow or
+// unavailable service worker can't block the badge/interception). Settings load
+// in parallel and refine behavior when they arrive.
+function boot() {
   if (document.body) start();
   else document.addEventListener('DOMContentLoaded', start, { once: true });
+}
+boot();
+loadSettings().finally(() => {
+  try {
+    runScan();
+  } catch {
+    /* ignore */
+  }
 });
