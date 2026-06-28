@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npm run lint && webpack --mode production",
     "watch": "webpack --watch --mode development",
-    "test": "node src/content/detector.test.mjs && node src/content/ui.test.mjs",
+    "test": "node src/content/detector.test.mjs && node src/content/ui.test.mjs && node src/background/phase4.test.mjs",
     "lint": "eslint src && npm run lint:css",
     "lint:css": "stylelint \"src/**/*.css\"",
     "lint:ext": "web-ext lint --source-dir dist",

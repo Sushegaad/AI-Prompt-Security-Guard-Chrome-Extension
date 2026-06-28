@@ -10,7 +10,8 @@
  *   { safeText, removed }   // removed = human list e.g. "names, emails, account IDs"
  * ========================================================================== */
 
-export const DEFAULT_REWRITE_ENDPOINT = 'https://api.aisafetyguard.app/v1/rewrite';
+import { DEFAULT_REWRITE_ENDPOINT } from '../shared/constants.js';
+export { DEFAULT_REWRITE_ENDPOINT };
 export const REWRITE_INSTRUCTION = 'Remove or generalize all sensitive details';
 
 /**

@@ -14,21 +14,17 @@
 
 import { detect, detectAsync, ASYNC_THRESHOLD, CATEGORY } from './detector.js';
 import { redact } from './redactor.js';
-import { rewrite, DEFAULT_REWRITE_ENDPOINT } from './rewriter.js';
+import { rewrite } from './rewriter.js';
 import { readInput, writeInput } from './dom-utils.js';
 import { getAdapter } from './sites/index.js';
 import { createBadge } from './ui/badge.js';
 import { createModal } from './ui/modal.js';
 import { loadFonts } from './ui/fonts.js';
 import { debounce } from '../shared/debounce.js';
-import { shouldInterrupt, DEFAULT_SENSITIVITY } from '../shared/constants.js';
+import { shouldInterrupt } from '../shared/constants.js';
+import { MSG, withDefaults } from '../shared/storage.js';
 
-const settings = {
-  enabled: true,
-  sensitivity: DEFAULT_SENSITIVITY,
-  allowRewrite: false,
-  rewriteApiEndpoint: DEFAULT_REWRITE_ENDPOINT,
-};
+const settings = withDefaults({});
 
 const adapter = getAdapter();
 const modal = createModal();
@@ -53,20 +49,33 @@ function consumeSuppression() {
 }
 
 /* ------------------------------- settings -------------------------------- */
+// The service worker owns storage; content scripts ask for settings by message.
 async function loadSettings() {
   try {
-    const s = await chrome.storage.local.get(settings);
-    Object.assign(settings, s);
+    const s = await chrome.runtime.sendMessage({ type: MSG.GET_SETTINGS });
+    if (s && typeof s === 'object' && !s.error) Object.assign(settings, withDefaults(s));
   } catch {
     /* defaults stand */
   }
 }
 try {
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg && msg.type === 'SETTINGS_UPDATED' && msg.settings) Object.assign(settings, msg.settings);
+    if (msg && msg.type === MSG.SETTINGS_UPDATED && msg.settings) {
+      Object.assign(settings, withDefaults(msg.settings));
+    }
   });
 } catch {
   /* no chrome in some contexts */
+}
+
+// Is the extension active for this tab's site?
+function siteEnabled() {
+  if (!settings.enabled) return false;
+  if (adapter.id === 'custom') {
+    const host = location.hostname;
+    return (settings.customDomains || []).some((d) => host === d || host.endsWith('.' + d));
+  }
+  return settings.enabledSites[adapter.id] !== false;
 }
 
 /* -------------------------------- scanning ------------------------------- */
@@ -76,6 +85,10 @@ function applyResult(result) {
 
 function runScan() {
   if (!inputEl) return;
+  if (!siteEnabled()) {
+    if (badge) badge.hide();
+    return;
+  }
   const text = readInput(inputEl);
   if (!text) {
     if (badge) badge.hide();
@@ -91,7 +104,7 @@ const scheduleScan = debounce(runScan, 300);
 
 /* ------------------------- submit interception --------------------------- */
 function evaluateSubmit(e) {
-  if (!settings.enabled || !inputEl) return;
+  if (!inputEl || !siteEnabled()) return;
   if (consumeSuppression()) return; // user already chose to send
   const text = readInput(inputEl);
   if (!text) return;
@@ -134,7 +147,10 @@ function openModal(result, text) {
       setConsent: async () => {
         settings.allowRewrite = true;
         try {
-          await chrome.storage.local.set({ allowRewrite: true });
+          await chrome.runtime.sendMessage({
+            type: MSG.SET_SETTINGS,
+            patch: { allowRewrite: true },
+          });
         } catch {
           /* ignore */
         }

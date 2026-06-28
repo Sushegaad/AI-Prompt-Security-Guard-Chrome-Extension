@@ -10,19 +10,16 @@
 </head>
 <body class="asg-root">
   <header class="popup-header">
-    <span class="wordmark">AI Safety Guard</span>
+    <span class="wordmark"><span class="wordmark__dot"></span>AI Safety Guard</span>
     <span class="status">Protecting this tab</span>
   </header>
 
-  <!-- Phase 1 skeleton. Sensitivity control, site toggles, counter, and the
-       '+ Add a custom AI domain' input are built in Phase 4 (Screen D). -->
-  <main class="popup-body">
-    <p class="placeholder">Settings UI arrives in Phase 4.</p>
-  </main>
+  <!-- Populated by popup.js from live settings. -->
+  <main class="popup-body" id="popup-body"></main>
 
   <footer class="popup-footer">
-    <span class="version">v1.0.0</span>
-    <button class="asg-btn asg-btn--link">Privacy &amp; settings</button>
+    <span class="version" id="version">v1.0.0</span>
+    <button class="asg-btn asg-btn--link" id="privacy-link">Privacy &amp; settings</button>
   </footer>
 
   <script src="popup.js"></script>

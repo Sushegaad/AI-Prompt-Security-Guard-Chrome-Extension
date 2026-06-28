@@ -161,3 +161,17 @@ export function shouldShowBadge(riskLevel, sensitivityId) {
   if (mode.badgeAlwaysVisible) return true;
   return riskLevel !== 'safe';
 }
+
+/* --- Misc app constants --------------------------------------------------- */
+// Default cloud-rewrite endpoint (B2). Configurable per user in settings.
+export const DEFAULT_REWRITE_ENDPOINT = 'https://api.aisafetyguard.app/v1/rewrite';
+
+// The supported AI sites shown as toggles (popup/onboarding) and keys in
+// settings.enabledSites. Order is the display order.
+export const SUPPORTED_SITES = Object.freeze([
+  { id: 'chatgpt', label: 'ChatGPT' },
+  { id: 'claude', label: 'Claude' },
+  { id: 'gemini', label: 'Gemini' },
+  { id: 'perplexity', label: 'Perplexity' },
+  { id: 'copilot', label: 'Copilot' },
+]);

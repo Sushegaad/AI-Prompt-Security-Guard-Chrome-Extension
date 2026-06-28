@@ -1,29 +1,67 @@
 /* ============================================================================
  * AI Safety Guard — Background Service Worker (MV3)
  * ----------------------------------------------------------------------------
- * Phase 1 skeleton. Responsibilities grow in later phases:
- *   - settings hub (single owner of chrome.storage reads/writes)   [Phase 4]
- *   - stats tracking (riskySubmissionsCaught counter)              [Phase 4]
- *   - first-run onboarding redirect                                [Phase 4]
+ * The single owner of chrome.storage reads/writes and the message hub for
+ * content scripts / popup / onboarding.
  *
- * MV3 service workers are EPHEMERAL — they shut down when idle. Never store
- * state in memory here; read from chrome.storage.local on every message.
+ * MV3 service workers are EPHEMERAL — they shut down when idle. We never hold
+ * settings in memory; every handler reads from chrome.storage fresh.
  * ========================================================================== */
 
-import { DEFAULT_SENSITIVITY } from '../shared/constants.js';
+import { MSG, readSettings, writeSettings, bumpCatch } from '../shared/storage.js';
 
-// First-run: open the onboarding tab. (Full 3-step flow lands in Phase 4.)
+/* --- First run: open onboarding ------------------------------------------ */
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/onboarding/onboarding.html') });
   }
-  console.log('[AI Safety Guard] installed. Default sensitivity:', DEFAULT_SENSITIVITY);
 });
 
-// Message hub stub — handlers (GET_SETTINGS, SETTINGS_UPDATED, RECORD_CATCH)
-// are implemented in Phase 4.
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  console.log('[AI Safety Guard] message received:', message?.type);
-  sendResponse({ ok: true });
-  return true;
+/* --- Broadcast settings to every content script -------------------------- */
+async function broadcastSettings(settings) {
+  let tabs = [];
+  try {
+    tabs = await chrome.tabs.query({});
+  } catch {
+    return;
+  }
+  for (const tab of tabs) {
+    if (!tab.id) continue;
+    // Tabs without our content script will reject — ignore those.
+    chrome.tabs.sendMessage(tab.id, { type: MSG.SETTINGS_UPDATED, settings }).catch(() => {});
+  }
+}
+
+/**
+ * Pure-ish message router (exported for tests). Calls the injected storage
+ * helpers and returns the response object to send back.
+ */
+export async function routeMessage(msg, deps = {}) {
+  const read = deps.readSettings || readSettings;
+  const write = deps.writeSettings || writeSettings;
+  const bump = deps.bumpCatch || bumpCatch;
+  const broadcast = deps.broadcast || broadcastSettings;
+
+  switch (msg && msg.type) {
+    case MSG.GET_SETTINGS:
+      return read();
+    case MSG.SET_SETTINGS: {
+      const settings = await write(msg.patch || {});
+      await broadcast(settings);
+      return settings;
+    }
+    case MSG.RECORD_CATCH: {
+      const riskySubmissionsCaught = await bump();
+      return { riskySubmissionsCaught };
+    }
+    default:
+      return { ok: false, error: 'unknown_message' };
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  routeMessage(msg)
+    .then(sendResponse)
+    .catch((err) => sendResponse({ ok: false, error: String(err) }));
+  return true; // keep the channel open for the async response
 });
