@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome to AI Safety Guard</title>
+  <link rel="stylesheet" href="../shared/fonts.css" />
+  <link rel="stylesheet" href="../shared/tokens.css" />
+  <style>
+    /* Phase 1 skeleton. Full 3-step flow (Screen E) is built in Phase 4. */
+    body.asg-root {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-paper);
+    }
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      max-width: 420px;
+      box-shadow: var(--shadow-modal);
+    }
+    h1 {
+      font-weight: var(--weight-medium);
+      font-size: var(--text-xl);
+      margin: 0 0 var(--space-2);
+    }
+    p {
+      color: var(--color-muted);
+      font-size: var(--text-md);
+      line-height: var(--line-normal);
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="asg-root">
+  <div class="card">
+    <h1>A safety net for AI</h1>
+    <p>
+      Scans on your device · Nothing stored, ever · You're always in control.
+      The full 3-step setup arrives in Phase 4.
+    </p>
+  </div>
+  <script src="onboarding.js"></script>
+</body>
+</html>

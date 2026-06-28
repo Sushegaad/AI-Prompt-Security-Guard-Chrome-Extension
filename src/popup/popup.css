@@ -1,0 +1,44 @@
+/* Popup (Screen D) — Phase 1 skeleton styles. Uses only design tokens. */
+body.asg-root {
+  width: 320px;
+  margin: 0;
+  background: var(--color-paper);
+}
+
+.popup-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+.wordmark {
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+}
+.status {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.popup-body {
+  padding: var(--space-4);
+  min-height: 80px;
+}
+.placeholder {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.version {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}

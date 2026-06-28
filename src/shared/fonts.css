@@ -1,0 +1,48 @@
+/* ============================================================================
+ * AI Safety Guard — Embedded Fonts
+ * ----------------------------------------------------------------------------
+ * Hanken Grotesk  → all UI text (labels, headings, body, buttons)
+ * Spline Sans Mono → data values & secrets ONLY (masked API keys, account
+ *                    numbers, emails in the warning modal / redaction chips)
+ *
+ * Weights are deliberately limited to 400 (regular) and 500 (medium).
+ * 600/700 read as heavy against host-site UI and must never be used.
+ *
+ * Fonts are embedded in the extension package (woff2 in assets/fonts/).
+ * NO runtime CDN. In content scripts the url() below resolves via the build
+ * pipeline; inside a shadow root, set the @font-face src using
+ * chrome.runtime.getURL('assets/fonts/<file>.woff2') so the font is inherited
+ * into the shadow DOM (fonts on the document root are NOT inherited).
+ * ========================================================================== */
+
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/hanken-grotesk-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Hanken Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../assets/fonts/hanken-grotesk-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../assets/fonts/spline-sans-mono-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../assets/fonts/spline-sans-mono-500.woff2") format("woff2");
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AI Safety Guard — Design System Preview</title>
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="tokens.css" />
+<style>
+  body {
+    margin: 0;
+    padding: 32px;
+    background: var(--color-paper);
+    font-family: var(--font-ui);
+    color: var(--color-ink);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-weight: var(--weight-medium); font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--color-muted); font-size: var(--text-md); margin-bottom: 28px; }
+  section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 18px;
+  }
+  h2 { font-weight: var(--weight-medium); font-size: var(--text-md);
+       text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted);
+       margin: 0 0 14px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 8px 0;
+         border-bottom: 1px solid var(--color-border); }
+  .row:last-child { border-bottom: none; }
+  .row .type { flex: 1; font-size: var(--text-md); }
+  .swatch { display:flex; gap:14px; flex-wrap:wrap; }
+  .chip { display:flex; flex-direction:column; align-items:center; gap:6px; font-size: var(--text-xs); color: var(--color-muted); }
+  .box { width:64px; height:40px; border-radius: var(--radius-sm); border:1px solid var(--color-border); }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px;
+    background: var(--color-surface); border:1px solid var(--color-border);
+    border-radius: var(--radius-md); padding:8px 12px; box-shadow: var(--shadow-badge);
+  }
+  .badge .label { font-weight: var(--weight-medium); font-size: var(--text-sm); }
+  .badge .meta { color: var(--color-muted); font-size: var(--text-xs); }
+  .redact-chip {
+    font-family: var(--font-data); font-size: var(--text-xs);
+    color: var(--color-trust); background: var(--color-trust-soft);
+    padding: 1px 6px; border-radius: var(--radius-sm); margin: 0 2px;
+  }
+  .card {
+    border:1px solid var(--color-border); border-radius: var(--radius-md);
+    padding:12px 14px; margin-bottom:10px;
+  }
+  .card.selected { border-color: var(--color-trust); background: var(--color-trust-soft); }
+  .card .name { font-weight: var(--weight-medium); font-size: var(--text-md); }
+  .card .desc { color: var(--color-muted); font-size: var(--text-sm); margin-top:2px; }
+  .rec { color: var(--color-trust); font-size: var(--text-xs); font-weight: var(--weight-medium);
+         text-transform: uppercase; letter-spacing:.05em; margin-left:8px; }
+  .btns { display:flex; gap:10px; margin-top:8px; }
+</style>
+</head>
+<body class="asg-root">
+<div class="wrap">
+  <h1>AI Safety Guard — Design System</h1>
+  <div class="sub">Phase 0 token preview. Every surface below uses only tokens from tokens.css / fonts.css.</div>
+
+  <section>
+    <h2>Typography</h2>
+    <div style="font-size:18px;">Hanken Grotesk 400 — the quick brown fox · UI body text</div>
+    <div style="font-size:18px; font-weight:500;">Hanken Grotesk 500 — the quick brown fox · headings &amp; labels</div>
+    <div class="asg-data" style="font-size:18px; margin-top:8px;">Spline Sans Mono 400 — sk-live-•••• · #88••• · sarah.chen@…</div>
+    <div class="asg-data" style="font-size:18px; font-weight:500;">Spline Sans Mono 500 — masked data, medium</div>
+  </section>
+
+  <section>
+    <h2>Brand palette</h2>
+    <div class="swatch">
+      <div class="chip"><div class="box" style="background:var(--color-trust)"></div>trust</div>
+      <div class="chip"><div class="box" style="background:var(--color-ink)"></div>ink</div>
+      <div class="chip"><div class="box" style="background:var(--color-paper)"></div>paper</div>
+      <div class="chip"><div class="box" style="background:var(--color-muted)"></div>muted</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Desaturated risk palette</h2>
+    <div class="swatch">
+      <div class="chip"><div class="box" style="background:var(--risk-safe-fg)"></div>safe</div>
+      <div class="chip"><div class="box" style="background:var(--risk-medium-fg)"></div>medium</div>
+      <div class="chip"><div class="box" style="background:var(--risk-high-fg)"></div>high</div>
+      <div class="chip"><div class="box" style="background:var(--risk-critical-fg)"></div>critical</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>A1 — Inline badge states</h2>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <span class="badge"><span class="asg-dot asg-dot--safe"></span><span class="label">Safe</span><span class="meta">scanned locally · 18ms</span></span>
+      <span class="badge"><span class="asg-dot asg-dot--medium"></span><span class="label">Medium risk</span><span class="meta">scanned locally · 18ms</span></span>
+      <span class="badge"><span class="asg-dot asg-dot--high"></span><span class="label">High risk</span><span class="meta">scanned locally · 18ms</span></span>
+      <span class="badge"><span class="asg-dot asg-dot--critical"></span><span class="label">Critical risk · 3 findings</span><span class="meta">scanned locally · 18ms</span></span>
+    </div>
+  </section>
+
+  <section>
+    <h2>A2 — Findings list pills</h2>
+    <div class="row"><span class="type">API key</span><span class="asg-data">sk-live-••••</span><span class="asg-pill asg-pill--critical">Critical</span></div>
+    <div class="row"><span class="type">Account number</span><span class="asg-data">#88•••</span><span class="asg-pill asg-pill--high">High</span></div>
+    <div class="row"><span class="type">Email address</span><span class="asg-data">sarah.chen@…</span><span class="asg-pill asg-pill--medium">Medium</span></div>
+  </section>
+
+  <section>
+    <h2>B1 — Redaction chips</h2>
+    <div style="font-size:var(--text-md); line-height:1.7;">
+      Draft a reply to this customer —
+      <span class="redact-chip">[NAME]</span>
+      (<span class="redact-chip">[EMAIL]</span>), account
+      <span class="redact-chip">[ACCOUNT]</span>, whose API key
+      <span class="redact-chip">[API_KEY]</span> stopped working.
+    </div>
+  </section>
+
+  <section>
+    <h2>Sensitivity modes (onboarding cards)</h2>
+    <div class="card"><div class="name">Basic</div><div class="desc">Warn only on credentials &amp; critical data</div></div>
+    <div class="card selected"><div class="name">Balanced <span class="rec">Recommended</span></div><div class="desc">Warn on personal, business &amp; sensitive data</div></div>
+    <div class="card"><div class="name">Strict</div><div class="desc">Flag everything; interrupt on medium and up</div></div>
+  </section>
+
+  <section>
+    <h2>Buttons</h2>
+    <div class="btns">
+      <button class="asg-btn asg-btn--primary">Redact sensitive data</button>
+      <button class="asg-btn asg-btn--secondary">Keep editing</button>
+      <button class="asg-btn asg-btn--link">Privacy &amp; settings</button>
+    </div>
+  </section>
+</div>
+</body>
+</html>

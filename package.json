@@ -1,0 +1,24 @@
+{
+  "name": "ai-safety-guard",
+  "version": "1.0.0",
+  "description": "A free Chrome extension that warns you before you send private information to an AI tool. Calm, plain-English, helpful — never punitive. Scanning happens on your device.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "webpack --mode production",
+    "watch": "webpack --watch --mode development",
+    "test": "node src/content/detector.test.mjs",
+    "lint": "eslint src --ext .js",
+    "lint:ext": "web-ext lint --source-dir dist",
+    "start:chrome": "web-ext run -t chromium --source-dir dist",
+    "format": "prettier --write \"src/**/*.{js,css,html}\""
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "web-ext": "^8.2.0",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

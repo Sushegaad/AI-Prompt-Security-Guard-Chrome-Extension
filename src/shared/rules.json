@@ -1,0 +1,50 @@
+{
+  "_comment": "AI Safety Guard — detection keyword & prefix data. Regex patterns live in detector.js; this file holds the editable word lists and token prefixes. Keep entries lowercase unless case is significant (API key prefixes are case-sensitive).",
+
+  "apiKeyPrefixes": [
+    "sk-live-", "sk-test-", "sk-proj-", "sk-", "pk-live-", "pk-test-", "rk-live-",
+    "ghp_", "gho_", "ghu_", "ghs_", "ghr_", "github_pat_", "glpat-",
+    "AKIA", "ASIA", "xoxb-", "xoxp-", "xoxa-", "xoxr-", "xapp-",
+    "AIza", "ya29.", "shpat_", "shpss_", "AC", "SK", "Bearer ", "token="
+  ],
+
+  "passwordKeywords": [
+    "password", "passwd", "pwd", "secret", "api_key", "apikey", "api-key",
+    "access_token", "accesstoken", "auth_token", "client_secret", "private_key",
+    "passphrase", "credential"
+  ],
+
+  "healthKeywords": [
+    "patient", "diagnosis", "diagnosed", "prescription", "prescribed",
+    "icd-9", "icd-10", "icd9", "icd10", "mrn", "date of birth", "dob",
+    "medical record", "blood pressure", "symptom", "treatment plan", "dosage"
+  ],
+
+  "financialKeywords": [
+    "invoice", "revenue", "ebitda", "bank account", "routing number", "routing #",
+    "account balance", "wire transfer", "iban", "swift code", "gross margin",
+    "net income", "accounts payable", "accounts receivable", "p&l", "profit and loss"
+  ],
+
+  "legalKeywords": [
+    "confidential", "attorney-client", "attorney client", "privileged",
+    "nda", "non-disclosure", "nondisclosure", "legally privileged",
+    "without prejudice", "subject to privilege", "proprietary and confidential",
+    "trade secret"
+  ],
+
+  "sourceCodeKeywords": [
+    "function ", "const ", "let ", "var ", "import ", "export ", "class ",
+    "def ", "public static", "private ", "#include", "package ", "return ",
+    "async ", "await ", "select ", " from ", "insert into", "console.log",
+    "print(", "println", "=>", "});"
+  ],
+
+  "streetSuffixes": [
+    "street", "st", "avenue", "ave", "boulevard", "blvd", "road", "rd",
+    "lane", "ln", "drive", "dr", "court", "ct", "way", "place", "pl",
+    "terrace", "ter", "circle", "cir", "highway", "hwy", "parkway", "pkwy"
+  ],
+
+  "internalTlds": ["internal", "local", "corp", "intra", "lan", "intranet"]
+}
