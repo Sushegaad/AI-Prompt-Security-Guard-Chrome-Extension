@@ -39,7 +39,7 @@ globalThis.chrome = {
   },
 };
 
-const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch } =
+const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, sanitizePatch, isValidEndpoint } =
   await import('../shared/storage.js');
 const { routeMessage } = await import('./service-worker.js');
 
@@ -87,6 +87,63 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
 
   const bad = await routeMessage({ type: 'NONSENSE' }, deps);
   ok('router unknown message -> error', bad.ok === false);
+}
+
+/* --------------------------------------------- validation (security #1) */
+{
+  ok('endpoint: https accepted', isValidEndpoint('https://api.example.com/x'));
+  ok('endpoint: http rejected', !isValidEndpoint('http://evil.example.com'));
+  ok('endpoint: garbage rejected', !isValidEndpoint('not a url'));
+
+  const dirty = sanitizePatch({
+    sensitivity: 'ultra', // invalid -> dropped
+    enabled: 1, // coerced bool
+    evilKey: 'pwn', // unknown -> dropped
+    rewriteApiEndpoint: 'http://evil.example.com', // non-https -> dropped
+    enabledSites: { claude: 0, bogus: true }, // unknown site dropped, bool coerced
+    customDomains: ['HTTPS://Foo.AI', 'not a domain', 123],
+    riskySubmissionsCaught: -5,
+  });
+  ok('sanitize: drops invalid sensitivity', !('sensitivity' in dirty));
+  ok('sanitize: coerces enabled to bool', dirty.enabled === true);
+  ok('sanitize: drops unknown keys', !('evilKey' in dirty));
+  ok('sanitize: drops non-https endpoint', !('rewriteApiEndpoint' in dirty));
+  ok('sanitize: keeps only known sites', dirty.enabledSites.claude === false && !('bogus' in dirty.enabledSites));
+  ok('sanitize: normalizes custom domains', dirty.customDomains.length === 1 && dirty.customDomains[0] === 'foo.ai');
+  ok('sanitize: clamps counter >= 0', dirty.riskySubmissionsCaught === 0);
+
+  const goodEp = sanitizePatch({ rewriteApiEndpoint: 'https://self-hosted.local/rewrite' });
+  ok('sanitize: keeps valid https endpoint', goodEp.rewriteApiEndpoint === 'https://self-hosted.local/rewrite');
+
+  // writeSettings must persist only sanitized values
+  const area = makeStorageArea();
+  await writeSettings({ sensitivity: 'strict', evilKey: 'x', rewriteApiEndpoint: 'http://evil' }, area);
+  ok('writeSettings: persists clean value', area._data.sensitivity === 'strict');
+  ok('writeSettings: never persists unknown key', !('evilKey' in area._data));
+  ok('writeSettings: never persists bad endpoint', !('rewriteApiEndpoint' in area._data));
+}
+
+/* ------------------------------------ rewrite via SW (security #2) ------ */
+{
+  const area = makeStorageArea();
+  const deps = {
+    readSettings: () => readSettings(area),
+    writeSettings: (p) => writeSettings(p, area),
+    bumpCatch: () => bumpCatch(area),
+    broadcast: () => {},
+    rewrite: async (prompt, cats, opts) => ({
+      safeText: `SAFE(${prompt.length}|${cats.join(',')}|${opts.endpoint})`,
+      removed: 'names',
+    }),
+  };
+
+  const denied = await routeMessage({ type: MSG.REWRITE, prompt: 'secret', categories: ['email'] }, deps);
+  ok('rewrite: refused without consent', denied.error === 'consent_required');
+
+  await writeSettings({ allowRewrite: true }, area);
+  const allowed = await routeMessage({ type: MSG.REWRITE, prompt: 'secret', categories: ['email'] }, deps);
+  ok('rewrite: runs after consent', allowed.safeText && allowed.safeText.startsWith('SAFE('));
+  ok('rewrite: uses endpoint from storage, not caller', allowed.safeText.includes('aisafetyguard.app'));
 }
 
 /* ------------------------------------------------- popup (jsdom) -------- */
@@ -191,6 +248,59 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   ok('onboarding: claude+gemini still on', fin.patch.enabledSites.claude === true && fin.patch.enabledSites.gemini === true);
   ok('onboarding: onDone (close tab) called', doneCalled === true);
   ok('onboarding api exposes state', ob.getState().step === 3);
+}
+
+/* ----------------------------------- site registry (DRY #4) ------------- */
+{
+  const { SITES, SITE_IDS, manifestMatchPatterns, siteForHost, groupsToEnabledSites, defaultEnabledSites } =
+    await import('../shared/sites.js');
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+  ok('registry: 5 sites', SITES.length === 5);
+  ok('registry: defaults all-on', Object.values(defaultEnabledSites()).every(Boolean) && Object.keys(defaultEnabledSites()).length === 5);
+  ok('registry: host resolution', siteForHost('chatgpt.com').id === 'chatgpt' && siteForHost('www.perplexity.ai').id === 'perplexity');
+  ok('registry: unknown host -> null', siteForHost('example.com') === null);
+  ok('registry: groups expand', groupsToEnabledSites({ chatgpt: true, claudeGemini: false, perplexityCopilot: true }).gemini === false);
+
+  // MANIFEST DRIFT GUARD: manifest host arrays must equal the registry.
+  const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8'));
+  const expected = [...manifestMatchPatterns()].sort();
+  const eq = (arr) => JSON.stringify([...arr].sort()) === JSON.stringify(expected);
+  ok('manifest: host_permissions match registry', eq(manifest.host_permissions));
+  ok('manifest: content_scripts.matches match registry', eq(manifest.content_scripts[0].matches));
+  ok('manifest: web_accessible_resources.matches match registry', eq(manifest.web_accessible_resources[0].matches));
+
+  // Adapter dispatcher derives from the registry (no per-site files).
+  globalThis.location = { hostname: 'chatgpt.com' };
+  const { getAdapter, ADAPTERS } = await import('../content/sites/index.js');
+  ok('adapters: built for every site', SITE_IDS.every((id) => !!ADAPTERS[id]));
+  ok('adapters: getAdapter resolves by host', getAdapter('claude.ai').id === 'claude');
+  ok('adapters: unknown host -> custom', getAdapter('nope.example').id === 'custom');
+}
+
+/* ------------------------------ token single-source (DRY #5) ------------ */
+{
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+  const { rootVars } = await import('../../scripts/gen-tokens.mjs');
+
+  const css = readFileSync(join(ROOT, 'src/shared/tokens.css'), 'utf8');
+  const root = css.match(/:root\s*\{([\s\S]*?)\}/)[1];
+  const inCss = {};
+  for (const m of root.matchAll(/(--[a-z0-9-]+):\s*([^;]+);/g)) inCss[m[1]] = m[2].trim();
+  const fromConstants = rootVars();
+
+  let drift = 0;
+  for (const [k, v] of Object.entries(fromConstants)) {
+    if (String(inCss[k]) !== String(v)) drift++;
+  }
+  ok('tokens.css :root is generated from constants (no drift)', drift === 0);
+  ok('tokens.css covers every constant token', Object.keys(fromConstants).every((k) => k in inCss));
 }
 
 /* ---------------------------------------------------------------- report */

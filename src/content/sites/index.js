@@ -1,15 +1,13 @@
 /* ============================================================================
  * AI Safety Guard — Site adapter dispatcher
- * Maps the current hostname to the right adapter. Custom domains (added by the
- * user in settings) fall back to a generic adapter.
+ * ----------------------------------------------------------------------------
+ * Builds one adapter per registry entry (shared/sites.js) and resolves the
+ * adapter for the current hostname. Custom domains added by the user fall back
+ * to a generic adapter.
  * ========================================================================== */
 
-import chatgpt from './chatgpt.js';
-import claude from './claude.js';
-import gemini from './gemini.js';
-import perplexity from './perplexity.js';
-import copilot from './copilot.js';
 import { makeAdapter } from './adapter-base.js';
+import { SITES, siteForHost } from '../../shared/sites.js';
 
 const generic = makeAdapter({
   id: 'custom',
@@ -17,21 +15,21 @@ const generic = makeAdapter({
   submit: ['button[type="submit"]', 'button[aria-label*="Send" i]', 'button[aria-label*="Submit" i]'],
 });
 
-const BY_HOST = [
-  [/(^|\.)chatgpt\.com$/, chatgpt],
-  [/(^|\.)chat\.openai\.com$/, chatgpt],
-  [/(^|\.)claude\.ai$/, claude],
-  [/(^|\.)gemini\.google\.com$/, gemini],
-  [/(^|\.)perplexity\.ai$/, perplexity],
-  [/(^|\.)copilot\.microsoft\.com$/, copilot],
-];
-
-export const ADAPTERS = { chatgpt, claude, gemini, perplexity, copilot };
+// One adapter per registry site, keyed by id.
+export const ADAPTERS = Object.fromEntries(
+  SITES.map((s) => [
+    s.id,
+    makeAdapter({
+      id: s.id,
+      input: s.selectors.input,
+      submit: s.selectors.submit,
+      badgeAnchor: s.selectors.badgeAnchor,
+    }),
+  ])
+);
 
 /** Resolve the adapter for a hostname (default: current location host). */
 export function getAdapter(host = location.hostname) {
-  for (const [re, adapter] of BY_HOST) {
-    if (re.test(host)) return adapter;
-  }
-  return generic;
+  const site = siteForHost(host);
+  return site ? ADAPTERS[site.id] : generic;
 }

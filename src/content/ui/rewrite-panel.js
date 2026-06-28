@@ -7,7 +7,7 @@
  * "Back" returns to A2 with no network call if the rewrite was never triggered.
  * ========================================================================== */
 
-import { h } from './h.js';
+import { h } from '../../shared/h.js';
 
 export function renderRewritePanel(props) {
   const {

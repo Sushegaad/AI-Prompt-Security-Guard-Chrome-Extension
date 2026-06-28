@@ -5,6 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "gen:tokens": "node scripts/gen-tokens.mjs",
+    "prebuild": "node scripts/gen-tokens.mjs",
     "build": "npm run lint && webpack --mode production",
     "watch": "webpack --watch --mode development",
     "test": "node src/content/detector.test.mjs && node src/content/ui.test.mjs && node src/background/phase4.test.mjs",

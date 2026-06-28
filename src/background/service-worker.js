@@ -9,6 +9,7 @@
  * ========================================================================== */
 
 import { MSG, readSettings, writeSettings, bumpCatch } from '../shared/storage.js';
+import { rewrite } from '../content/rewriter.js';
 
 /* --- First run: open onboarding ------------------------------------------ */
 chrome.runtime.onInstalled.addListener((details) => {
@@ -54,12 +55,34 @@ export async function routeMessage(msg, deps = {}) {
       const riskySubmissionsCaught = await bump();
       return { riskySubmissionsCaught };
     }
+    case MSG.REWRITE: {
+      // The ONLY network egress, performed here in the background (not the
+      // content script) so it's not subject to the host page's CSP and the
+      // endpoint comes from trusted storage — never from the caller.
+      const settings = await read();
+      if (!settings.allowRewrite) return { error: 'consent_required' };
+      const doRewrite = deps.rewrite || rewrite;
+      try {
+        const out = await doRewrite(msg.prompt, msg.categories, {
+          endpoint: settings.rewriteApiEndpoint,
+        });
+        return { safeText: out.safeText, removed: out.removed };
+      } catch (e) {
+        return { error: 'rewrite_failed', detail: String(e) };
+      }
+    }
     default:
       return { ok: false, error: 'unknown_message' };
   }
 }
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // Defense-in-depth: only accept messages originating from THIS extension
+  // (our content scripts / popup / onboarding). Reject anything else.
+  if (sender && sender.id && sender.id !== chrome.runtime.id) {
+    sendResponse({ ok: false, error: 'forbidden_sender' });
+    return false;
+  }
   routeMessage(msg)
     .then(sendResponse)
     .catch((err) => sendResponse({ ok: false, error: String(err) }));

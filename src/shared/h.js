@@ -1,8 +1,12 @@
 /* ============================================================================
- * AI Safety Guard — tiny hyperscript helper for building shadow-DOM UI.
+ * AI Safety Guard — tiny hyperscript helper (single shared implementation)
+ * ----------------------------------------------------------------------------
  * h('button.asg-btn', { onclick }, 'Label') -> HTMLButtonElement
  * Tag may include .class tokens. Text children are added as text nodes, so user
  * content is NEVER interpreted as HTML (defends against host-page injection).
+ *
+ * Used by the shadow-DOM UI (badge/modal/redact/rewrite) and the extension
+ * pages (popup/onboarding) — one implementation, no duplication.
  * ========================================================================== */
 
 export function h(tagSpec, attrs = {}, children = []) {
@@ -14,6 +18,8 @@ export function h(tagSpec, attrs = {}, children = []) {
     if (k === 'class') node.className = node.className ? node.className + ' ' + v : v;
     else if (k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
     else if (k === 'text') node.textContent = v;
+    else if (k === 'checked') node.checked = !!v;
+    else if (k === 'value') node.value = v;
     else node.setAttribute(k, v);
   }
   const kids = Array.isArray(children) ? children : [children];

@@ -9,13 +9,14 @@
  * reads from storage fresh — never from memory.
  * ========================================================================== */
 
-import { DEFAULT_SENSITIVITY, DEFAULT_REWRITE_ENDPOINT } from './constants.js';
+import { DEFAULT_SENSITIVITY, DEFAULT_REWRITE_ENDPOINT, SENSITIVITY } from './constants.js';
+import { defaultEnabledSites } from './sites.js';
 
 /** Full settings schema with defaults. */
 export const DEFAULT_SETTINGS = Object.freeze({
   enabled: true,
   sensitivity: DEFAULT_SENSITIVITY, // "balanced"
-  enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, copilot: true },
+  enabledSites: defaultEnabledSites(), // all supported sites on, from the registry
   customDomains: [],
   disabledCategories: [],
   allowRewrite: false, // true only after explicit B2 consent
@@ -31,6 +32,7 @@ export const MSG = Object.freeze({
   SET_SETTINGS: 'SET_SETTINGS',
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   RECORD_CATCH: 'RECORD_CATCH',
+  REWRITE: 'REWRITE', // content -> SW: perform the (only) cloud rewrite call
 });
 
 /** Deep-ish merge of stored values over defaults (enabledSites merged by key). */
@@ -40,6 +42,61 @@ export function withDefaults(stored = {}) {
     ...stored,
     enabledSites: { ...DEFAULT_SETTINGS.enabledSites, ...(stored.enabledSites || {}) },
   };
+}
+
+/** A rewrite endpoint must be a valid https:// URL (prevents prompt exfil). */
+export function isValidEndpoint(url) {
+  try {
+    return new URL(url).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Whitelist + type-check an incoming settings patch. Untrusted callers can only
+ * ever write known keys with valid values — never arbitrary storage entries,
+ * and never a non-https rewrite endpoint. This is the security boundary for
+ * SET_SETTINGS.
+ */
+export function sanitizePatch(patch = {}) {
+  const out = {};
+  if (!patch || typeof patch !== 'object') return out;
+  const has = (k) => Object.prototype.hasOwnProperty.call(patch, k);
+
+  if (has('enabled')) out.enabled = !!patch.enabled;
+  if (has('sensitivity') && Object.keys(SENSITIVITY).includes(patch.sensitivity)) {
+    out.sensitivity = patch.sensitivity;
+  }
+  if (has('enabledSites') && patch.enabledSites && typeof patch.enabledSites === 'object') {
+    const sites = {};
+    for (const k of Object.keys(DEFAULT_SETTINGS.enabledSites)) {
+      if (k in patch.enabledSites) sites[k] = !!patch.enabledSites[k];
+    }
+    out.enabledSites = sites;
+  }
+  if (has('customDomains') && Array.isArray(patch.customDomains)) {
+    out.customDomains = patch.customDomains
+      .filter((d) => typeof d === 'string')
+      .map((d) => d.trim().toLowerCase().replace(/^https?:\/\//, ''))
+      .filter((d) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d))
+      .slice(0, 50);
+  }
+  if (has('disabledCategories') && Array.isArray(patch.disabledCategories)) {
+    out.disabledCategories = patch.disabledCategories
+      .filter((c) => typeof c === 'string')
+      .slice(0, 50);
+  }
+  if (has('allowRewrite')) out.allowRewrite = !!patch.allowRewrite;
+  if (has('rewriteApiEndpoint') && isValidEndpoint(patch.rewriteApiEndpoint)) {
+    out.rewriteApiEndpoint = patch.rewriteApiEndpoint;
+  }
+  if (has('analyticsEnabled')) out.analyticsEnabled = !!patch.analyticsEnabled;
+  if (has('onboardingComplete')) out.onboardingComplete = !!patch.onboardingComplete;
+  if (has('riskySubmissionsCaught') && Number.isFinite(patch.riskySubmissionsCaught)) {
+    out.riskySubmissionsCaught = Math.max(0, Math.floor(patch.riskySubmissionsCaught));
+  }
+  return out;
 }
 
 /* --- service-worker-side helpers (require chrome.storage.local) ----------- */
@@ -52,7 +109,7 @@ export async function readSettings(area) {
 
 export async function writeSettings(patch, area) {
   const storage = area || chrome.storage.local;
-  await storage.set(patch);
+  await storage.set(sanitizePatch(patch));
   return readSettings(storage);
 }
 

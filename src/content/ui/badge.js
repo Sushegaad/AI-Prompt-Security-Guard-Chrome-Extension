@@ -13,7 +13,7 @@
 
 import { createShadowHost } from './shadow-style.js';
 import { RISK, shouldShowBadge } from '../../shared/constants.js';
-import { h, riskClass } from './h.js';
+import { h, riskClass } from '../../shared/h.js';
 
 export function createBadge(anchorEl, doc = document) {
   const { host, root } = createShadowHost(doc, 'asg-badge-host');

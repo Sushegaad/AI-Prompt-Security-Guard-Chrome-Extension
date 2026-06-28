@@ -7,32 +7,11 @@
 
 import { MSG, withDefaults } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
+import { SITES } from '../shared/sites.js';
+import { h as el } from '../shared/h.js';
 
-// Popup shows these four site toggles (per Design v1 Screen D).
-const POPUP_SITES = [
-  { id: 'chatgpt', label: 'ChatGPT' },
-  { id: 'claude', label: 'Claude' },
-  { id: 'gemini', label: 'Gemini' },
-  { id: 'perplexity', label: 'Perplexity' },
-];
-
-function el(tag, attrs = {}, kids = []) {
-  const [t, ...cls] = tag.split('.');
-  const n = document.createElement(t);
-  if (cls.length) n.className = cls.join(' ');
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v == null) continue;
-    if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
-    else if (k === 'text') n.textContent = v;
-    else if (k === 'checked') n.checked = !!v;
-    else n.setAttribute(k, v);
-  }
-  for (const c of [].concat(kids)) {
-    if (c == null || c === false) continue;
-    n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
-  return n;
-}
+// Site toggles shown in the popup, derived from the registry (Design v1 D).
+const POPUP_SITES = SITES.filter((s) => s.inPopup).map((s) => ({ id: s.id, label: s.label }));
 
 export function initPopup(opts = {}) {
   const doc = opts.doc || document;

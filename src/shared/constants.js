@@ -43,9 +43,18 @@ export const ELEVATION = Object.freeze({
   badge: '0 2px 8px rgba(26, 26, 46, 0.10)',
 });
 
-/* --- Shape & spacing scale (mirror of tokens.css) ------------------------- */
+/* --- Shape, spacing & type scale (the single source for CSS tokens too) --- */
 export const RADIUS = Object.freeze({ sm: '6px', md: '10px', lg: '14px', pill: '999px' });
 export const SPACE = Object.freeze({ s1: '4px', s2: '8px', s3: '12px', s4: '16px', s5: '24px' });
+export const TYPE = Object.freeze({
+  xs: '11px',
+  sm: '13px',
+  md: '14px',
+  lg: '16px',
+  xl: '19px',
+  lineSnug: '1.3',
+  lineNormal: '1.5',
+});
 
 /* --- Risk levels ----------------------------------------------------------
  * Ordered low → high. `rank` lets the detector pick "highest category wins".
@@ -166,12 +175,4 @@ export function shouldShowBadge(riskLevel, sensitivityId) {
 // Default cloud-rewrite endpoint (B2). Configurable per user in settings.
 export const DEFAULT_REWRITE_ENDPOINT = 'https://api.aisafetyguard.app/v1/rewrite';
 
-// The supported AI sites shown as toggles (popup/onboarding) and keys in
-// settings.enabledSites. Order is the display order.
-export const SUPPORTED_SITES = Object.freeze([
-  { id: 'chatgpt', label: 'ChatGPT' },
-  { id: 'claude', label: 'Claude' },
-  { id: 'gemini', label: 'Gemini' },
-  { id: 'perplexity', label: 'Perplexity' },
-  { id: 'copilot', label: 'Copilot' },
-]);
+// NOTE: the supported-site list lives in shared/sites.js (single source).

@@ -9,24 +9,8 @@
 
 import { MSG } from '../shared/storage.js';
 import { SENSITIVITY, DEFAULT_SENSITIVITY } from '../shared/constants.js';
-
-function el(tag, attrs = {}, kids = []) {
-  const [t, ...cls] = tag.split('.');
-  const n = document.createElement(t);
-  if (cls.length) n.className = cls.join(' ');
-  for (const [k, v] of Object.entries(attrs)) {
-    if (v == null) continue;
-    if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
-    else if (k === 'text') n.textContent = v;
-    else if (k === 'checked') n.checked = !!v;
-    else n.setAttribute(k, v);
-  }
-  for (const c of [].concat(kids)) {
-    if (c == null || c === false) continue;
-    n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  }
-  return n;
-}
+import { SITE_GROUPS, groupsToEnabledSites } from '../shared/sites.js';
+import { h as el } from '../shared/h.js';
 
 export function initOnboarding(opts = {}) {
   const doc = opts.doc || document;
@@ -37,7 +21,7 @@ export function initOnboarding(opts = {}) {
   const state = {
     step: 1,
     sensitivity: DEFAULT_SENSITIVITY,
-    groups: { chatgpt: true, claudeGemini: true, perplexityCopilot: true },
+    groups: Object.fromEntries(SITE_GROUPS.map((g) => [g.key, true])),
     customDomains: [],
   };
 
@@ -115,9 +99,7 @@ export function initOnboarding(opts = {}) {
       meta(3),
       el('h1', { text: 'Where should we watch?' }),
       el('p.sub', { text: 'On by default for the major AI tools.' }),
-      siteToggle('ChatGPT', 'chatgpt'),
-      siteToggle('Claude & Gemini', 'claudeGemini'),
-      siteToggle('Perplexity & Copilot', 'perplexityCopilot'),
+      ...SITE_GROUPS.map((g) => siteToggle(g.label, g.key)),
       domain,
       el('button.asg-btn.asg-btn--primary.cta', {
         type: 'button',
@@ -133,14 +115,7 @@ export function initOnboarding(opts = {}) {
   }
 
   async function finish(domainValue) {
-    const g = state.groups;
-    const enabledSites = {
-      chatgpt: g.chatgpt,
-      claude: g.claudeGemini,
-      gemini: g.claudeGemini,
-      perplexity: g.perplexityCopilot,
-      copilot: g.perplexityCopilot,
-    };
+    const enabledSites = groupsToEnabledSites(state.groups);
     const customDomains = [];
     const v = (domainValue || '').trim().toLowerCase().replace(/^https?:\/\//, '');
     if (v) customDomains.push(v);

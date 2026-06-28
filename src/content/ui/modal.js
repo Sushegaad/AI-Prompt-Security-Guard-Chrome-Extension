@@ -9,7 +9,7 @@
 
 import { createShadowHost } from './shadow-style.js';
 import { RISK } from '../../shared/constants.js';
-import { h, riskClass } from './h.js';
+import { h, riskClass } from '../../shared/h.js';
 import { renderRedactReview } from './redact-review.js';
 import { renderRewritePanel } from './rewrite-panel.js';
 import { removalNote } from '../rewriter.js';

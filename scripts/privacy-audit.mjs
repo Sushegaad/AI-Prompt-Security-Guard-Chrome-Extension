@@ -94,13 +94,27 @@ const schemaKeys = (storeSrc.match(/DEFAULT_SETTINGS = Object\.freeze\(\{([\s\S]
 const hasCounterOnly = /riskySubmissionsCaught/.test(schemaKeys) && !FORBIDDEN_KEYS.test(schemaKeys);
 note('settings schema = preferences + counter only', hasCounterOnly);
 
-/* 4. No prompt text in messages or analytics ------------------------------- */
-// RECORD_CATCH and SETTINGS messages must not carry prompt text.
-const sendsPrompt = files
-  .filter((f) => !isTest(f))
-  .filter((f) => /sendMessage\([^)]*\b(text|prompt|rawValue)\b/.test(code(f).replace(/\s+/g, ' ')))
-  .map(rel);
-note('no message payload carries prompt text', sendsPrompt.length === 0, sendsPrompt.join(', '));
+/* 4. Prompt text only travels via the consented REWRITE message ------------ */
+// Find every sendMessage(...) call object; any that carries prompt/text/rawValue
+// MUST be the REWRITE message (the one consented egress). Nothing else may.
+const promptMsgViolations = [];
+for (const f of files.filter((x) => !isTest(x))) {
+  const src = code(f);
+  const calls = src.match(/sendMessage\(\s*\{[\s\S]*?\}\s*\)/g) || [];
+  for (const call of calls) {
+    if (/\b(prompt|rawValue|inputText)\b/.test(call) && !/REWRITE/.test(call)) {
+      promptMsgViolations.push(rel(f));
+    }
+  }
+}
+note('prompt text only sent via the REWRITE message', promptMsgViolations.length === 0, promptMsgViolations.join(', '));
+
+// The service worker must refuse REWRITE without consent (defense in depth).
+const swSrc = code(join(SRC, 'background/service-worker.js'));
+note(
+  'service worker refuses REWRITE without consent',
+  /case MSG\.REWRITE/.test(swSrc) && /if \(!settings\.allowRewrite\) return \{ error: 'consent_required' \}/.test(swSrc)
+);
 
 // No third-party analytics endpoints embedded.
 const ANALYTICS = /(google-analytics|googletagmanager|segment\.io|mixpanel|amplitude|sentry|bugsnag)/i;

@@ -7,7 +7,7 @@
  * "Undo" restores the original text exactly.
  * ========================================================================== */
 
-import { h } from './h.js';
+import { h } from '../../shared/h.js';
 
 // Render the redacted string with [LABEL] tokens shown as chips.
 function renderRedactedText(text) {

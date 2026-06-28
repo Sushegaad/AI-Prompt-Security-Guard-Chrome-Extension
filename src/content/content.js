@@ -14,7 +14,6 @@
 
 import { detect, detectAsync, ASYNC_THRESHOLD, CATEGORY } from './detector.js';
 import { redact } from './redactor.js';
-import { rewrite } from './rewriter.js';
 import { readInput, writeInput } from './dom-utils.js';
 import { getAdapter } from './sites/index.js';
 import { createBadge } from './ui/badge.js';
@@ -139,7 +138,16 @@ function openModal(result, text) {
     services: {
       redact: (t, matches) => redact(t, matches),
       rescan: (t) => detect(t),
-      rewrite: (t, cats) => rewrite(t, cats, { endpoint: settings.rewriteApiEndpoint }),
+      // Rewrite is performed by the service worker (the only network egress).
+      rewrite: async (t, cats) => {
+        const r = await chrome.runtime.sendMessage({
+          type: MSG.REWRITE,
+          prompt: t,
+          categories: cats,
+        });
+        if (!r || r.error) throw new Error((r && r.error) || 'rewrite_failed');
+        return r;
+      },
       getRewriteConfig: async () => ({
         allowRewrite: settings.allowRewrite,
         endpoint: settings.rewriteApiEndpoint,
