@@ -39,13 +39,13 @@ globalThis.chrome = {
   },
 };
 
-const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, sanitizePatch, isValidEndpoint } =
+const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, sanitizePatch } =
   await import('../shared/storage.js');
 const { routeMessage } = await import('./service-worker.js');
 
 /* --------------------------------------------------------- storage schema */
 ok('schema: sensitivity default balanced', DEFAULT_SETTINGS.sensitivity === 'balanced');
-ok('schema: allowRewrite false by default', DEFAULT_SETTINGS.allowRewrite === false);
+ok('schema: no rewrite settings (B2 removed)', !('allowRewrite' in DEFAULT_SETTINGS) && !('rewriteApiEndpoint' in DEFAULT_SETTINGS));
 ok('schema: analytics on by default', DEFAULT_SETTINGS.analyticsEnabled === true);
 ok('schema: onboarding incomplete by default', DEFAULT_SETTINGS.onboardingComplete === false);
 ok('schema: counter starts at 0', DEFAULT_SETTINGS.riskySubmissionsCaught === 0);
@@ -91,15 +91,10 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
 
 /* --------------------------------------------- validation (security #1) */
 {
-  ok('endpoint: https accepted', isValidEndpoint('https://api.example.com/x'));
-  ok('endpoint: http rejected', !isValidEndpoint('http://evil.example.com'));
-  ok('endpoint: garbage rejected', !isValidEndpoint('not a url'));
-
   const dirty = sanitizePatch({
     sensitivity: 'ultra', // invalid -> dropped
     enabled: 1, // coerced bool
     evilKey: 'pwn', // unknown -> dropped
-    rewriteApiEndpoint: 'http://evil.example.com', // non-https -> dropped
     enabledSites: { claude: 0, bogus: true }, // unknown site dropped, bool coerced
     customDomains: ['HTTPS://Foo.AI', 'not a domain', 123],
     riskySubmissionsCaught: -5,
@@ -107,58 +102,15 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   ok('sanitize: drops invalid sensitivity', !('sensitivity' in dirty));
   ok('sanitize: coerces enabled to bool', dirty.enabled === true);
   ok('sanitize: drops unknown keys', !('evilKey' in dirty));
-  ok('sanitize: drops non-https endpoint', !('rewriteApiEndpoint' in dirty));
   ok('sanitize: keeps only known sites', dirty.enabledSites.claude === false && !('bogus' in dirty.enabledSites));
   ok('sanitize: normalizes custom domains', dirty.customDomains.length === 1 && dirty.customDomains[0] === 'foo.ai');
   ok('sanitize: clamps counter >= 0', dirty.riskySubmissionsCaught === 0);
 
-  const goodEp = sanitizePatch({ rewriteApiEndpoint: 'https://self-hosted.local/rewrite' });
-  ok('sanitize: keeps valid https endpoint', goodEp.rewriteApiEndpoint === 'https://self-hosted.local/rewrite');
-
   // writeSettings must persist only sanitized values
   const area = makeStorageArea();
-  await writeSettings({ sensitivity: 'strict', evilKey: 'x', rewriteApiEndpoint: 'http://evil' }, area);
+  await writeSettings({ sensitivity: 'strict', evilKey: 'x' }, area);
   ok('writeSettings: persists clean value', area._data.sensitivity === 'strict');
   ok('writeSettings: never persists unknown key', !('evilKey' in area._data));
-  ok('writeSettings: never persists bad endpoint', !('rewriteApiEndpoint' in area._data));
-}
-
-/* ------------------------------------ rewrite via SW (security #2) ------ */
-{
-  const area = makeStorageArea();
-  const deps = {
-    readSettings: () => readSettings(area),
-    writeSettings: (p) => writeSettings(p, area),
-    bumpCatch: () => bumpCatch(area),
-    broadcast: () => {},
-    rewrite: async (prompt, cats, opts) => ({ safeText: `CLOUD(${opts.endpoint})`, removed: 'names' }),
-    localRewrite: () => ({ safeText: 'LOCAL_SAFE', removed: 'email' }),
-  };
-
-  // Default endpoint => on-device generalization, no consent, no network.
-  const localRes = await routeMessage({ type: MSG.REWRITE, prompt: 'a@b.com', categories: ['email'] }, deps);
-  ok('rewrite: default uses on-device (no consent, no cloud)', localRes.mode === 'local' && localRes.safeText === 'LOCAL_SAFE');
-
-  // Custom endpoint without consent => refused.
-  await writeSettings({ rewriteApiEndpoint: 'https://self.example/rw' }, area);
-  const denied = await routeMessage({ type: MSG.REWRITE, prompt: 'x', categories: [] }, deps);
-  ok('rewrite: custom cloud refused without consent', denied.error === 'consent_required');
-
-  // Custom endpoint with consent => cloud, endpoint from storage (not caller).
-  await writeSettings({ allowRewrite: true }, area);
-  const cloud = await routeMessage({ type: MSG.REWRITE, prompt: 'x', categories: [] }, deps);
-  ok('rewrite: custom cloud after consent', cloud.mode === 'cloud' && cloud.safeText.includes('self.example'));
-
-  // Cloud failure => on-device fallback (never a hard error for the user).
-  const deps2 = { ...deps, rewrite: async () => { throw new Error('down'); } };
-  const fb = await routeMessage({ type: MSG.REWRITE, prompt: 'a@b.com', categories: ['email'] }, deps2);
-  ok('rewrite: cloud failure falls back to on-device', fb.mode === 'local' && fb.safeText === 'LOCAL_SAFE');
-
-  // Real on-device generalization replaces the secret with a generic phrase.
-  const { localRewrite } = await import('../content/rewriter.js');
-  const lr = localRewrite('my key is sk-live-9fK2pQ7xR4mZ8vB1');
-  ok('localRewrite: replaces secret with generic phrase', lr.safeText.includes('an API key'));
-  ok('localRewrite: raw secret removed', !lr.safeText.includes('sk-live-9fK2pQ7xR4mZ8vB1'));
 }
 
 /* ------------------------------------------------- popup (jsdom) -------- */

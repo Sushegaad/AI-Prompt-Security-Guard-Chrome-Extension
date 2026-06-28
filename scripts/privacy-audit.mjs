@@ -53,30 +53,19 @@ const note = (label, passOk, detail = '') => {
 console.log('AI Safety Guard — privacy audit\n');
 
 /* 1. Network egress surface ------------------------------------------------ */
+// The MVP has NO cloud feature at all. The only network API used is the
+// extension fetching its OWN bundled fonts (fonts.js) — never any user content.
 const NET = /\b(fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource)\b/;
 const netFiles = files.filter((f) => !isTest(f) && NET.test(code(f))).map(rel);
-// Allowed: rewriter.js (cloud rewrite egress) and fonts.js (extension-origin fetch of own woff2).
-const ALLOWED_NET = ['src/content/rewriter.js', 'src/content/ui/fonts.js'];
+const ALLOWED_NET = ['src/content/ui/fonts.js'];
 const unexpectedNet = netFiles.filter((f) => !ALLOWED_NET.includes(f));
-note('only rewriter + fonts touch network APIs', unexpectedNet.length === 0, unexpectedNet.join(', ') || `found in: ${netFiles.join(', ')}`);
+note('only the font loader touches network APIs (no cloud egress)', unexpectedNet.length === 0, unexpectedNet.join(', ') || `found in: ${netFiles.join(', ')}`);
 
 // fonts.js must fetch the extension's OWN resource (getURL), not an arbitrary URL.
 const fontsSrc = code(join(SRC, 'content/ui/fonts.js'));
 note(
   'fonts fetch is extension-origin only (chrome.runtime.getURL)',
   /fetch\(\s*chrome\.runtime\.getURL/.test(fontsSrc) && !/fetch\(\s*['"]https?:/.test(fontsSrc)
-);
-
-/* 2. Rewrite is consent-gated --------------------------------------------- */
-const modalSrc = code(join(SRC, 'content/ui/modal.js'));
-note(
-  'B2 rewrite is gated behind consent (allowRewrite / onEnableConsent)',
-  /onEnableConsent/.test(modalSrc) && /state\.allowRewrite/.test(modalSrc) && /if \(state\.allowRewrite\) triggerRewrite\(\)/.test(modalSrc)
-);
-const contentSrc = code(join(SRC, 'content/content.js'));
-note(
-  'content getRewriteConfig reads allowRewrite (no unconditional rewrite)',
-  /getRewriteConfig:/.test(contentSrc) && /allowRewrite: settings\.allowRewrite/.test(contentSrc)
 );
 
 /* 3. Storage writes: only via storage.js, only schema + counter ------------ */
@@ -94,27 +83,17 @@ const schemaKeys = (storeSrc.match(/DEFAULT_SETTINGS = Object\.freeze\(\{([\s\S]
 const hasCounterOnly = /riskySubmissionsCaught/.test(schemaKeys) && !FORBIDDEN_KEYS.test(schemaKeys);
 note('settings schema = preferences + counter only', hasCounterOnly);
 
-/* 4. Prompt text only travels via the consented REWRITE message ------------ */
-// Find every sendMessage(...) call object; any that carries prompt/text/rawValue
-// MUST be the REWRITE message (the one consented egress). Nothing else may.
+/* 4. No message ever carries prompt text ----------------------------------- */
+// With no cloud feature, prompt/raw text must NEVER appear in any message.
 const promptMsgViolations = [];
 for (const f of files.filter((x) => !isTest(x))) {
   const src = code(f);
   const calls = src.match(/sendMessage\(\s*\{[\s\S]*?\}\s*\)/g) || [];
   for (const call of calls) {
-    if (/\b(prompt|rawValue|inputText)\b/.test(call) && !/REWRITE/.test(call)) {
-      promptMsgViolations.push(rel(f));
-    }
+    if (/\b(prompt|rawValue|inputText)\b/.test(call)) promptMsgViolations.push(rel(f));
   }
 }
-note('prompt text only sent via the REWRITE message', promptMsgViolations.length === 0, promptMsgViolations.join(', '));
-
-// The service worker must refuse REWRITE without consent (defense in depth).
-const swSrc = code(join(SRC, 'background/service-worker.js'));
-note(
-  'service worker refuses REWRITE without consent',
-  /case MSG\.REWRITE/.test(swSrc) && /if \(!settings\.allowRewrite\) return \{ error: 'consent_required' \}/.test(swSrc)
-);
+note('no message payload carries prompt/raw text', promptMsgViolations.length === 0, promptMsgViolations.join(', '));
 
 // No third-party analytics endpoints embedded.
 const ANALYTICS = /(google-analytics|googletagmanager|segment\.io|mixpanel|amplitude|sentry|bugsnag)/i;

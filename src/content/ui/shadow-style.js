@@ -1,7 +1,7 @@
 /* ============================================================================
  * AI Safety Guard — Shadow-DOM styling
  * ----------------------------------------------------------------------------
- * All injected UI (badge, modal, redact, rewrite) lives inside a shadow root to
+ * All injected UI (badge, modal, redact) lives inside a shadow root to
  * isolate it from the host site's CSS. Fonts are NOT inherited into shadow
  * roots, so we declare @font-face *inside* the shadow root, pointing at the
  * extension's embedded woff2 via chrome.runtime.getURL (web_accessible_resource).
@@ -11,6 +11,7 @@
  * ========================================================================== */
 
 import { BRAND, RISK, FONTS, ELEVATION, RADIUS, SPACE } from '../../shared/constants.js';
+import { logoDataUri } from '../../shared/logo.js';
 
 /**
  * Full CSS string for the shadow root: tokens + component rules.
@@ -82,7 +83,7 @@ export function getShadowCss() {
   padding: ${SPACE.s4} ${SPACE.s4} 0;
 }
 .asg-wordmark { display: inline-flex; align-items: center; gap: ${SPACE.s2}; font-weight: var(--w-medium); font-size: 13px; }
-.asg-wordmark__dot { width: 16px; height: 16px; border-radius: var(--r-sm); background: var(--trust); display: inline-block; }
+.asg-wordmark__dot { width: 18px; height: 18px; background: url("${logoDataUri()}") center / contain no-repeat; display: inline-block; }
 .asg-x { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px; }
 .asg-card__body { padding: ${SPACE.s3} ${SPACE.s4} ${SPACE.s4}; }
 .asg-title { font-weight: var(--w-medium); font-size: 19px; margin: ${SPACE.s2} 0 ${SPACE.s1}; }
@@ -116,13 +117,6 @@ export function getShadowCss() {
 /* B1 redaction chips */
 .asg-redacted { font-size: 14px; line-height: 1.7; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: ${SPACE.s3}; white-space: pre-wrap; }
 .asg-chip { font-family: var(--font-data); font-size: 12px; color: var(--trust); background: var(--trust-soft); padding: 1px 6px; border-radius: var(--r-sm); margin: 0 1px; }
-
-/* B2 two-column compare */
-.asg-compare { display: grid; grid-template-columns: 1fr 1fr; gap: ${SPACE.s3}; }
-.asg-col__label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: ${SPACE.s1}; }
-.asg-col__text { font-size: 13px; line-height: 1.5; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: ${SPACE.s3}; min-height: 96px; white-space: pre-wrap; }
-.asg-removed { color: var(--muted); font-size: 12px; margin: ${SPACE.s3} 0 0; }
-.asg-disclosure { display: flex; align-items: flex-start; gap: ${SPACE.s2}; color: var(--muted); font-size: 12px; line-height: 1.4; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: ${SPACE.s3}; margin: ${SPACE.s3} 0; }
 `;
 }
 

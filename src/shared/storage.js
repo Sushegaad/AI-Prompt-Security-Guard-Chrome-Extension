@@ -9,7 +9,7 @@
  * reads from storage fresh — never from memory.
  * ========================================================================== */
 
-import { DEFAULT_SENSITIVITY, DEFAULT_REWRITE_ENDPOINT, SENSITIVITY } from './constants.js';
+import { DEFAULT_SENSITIVITY, SENSITIVITY } from './constants.js';
 import { defaultEnabledSites } from './sites.js';
 
 /** Full settings schema with defaults. */
@@ -19,8 +19,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   enabledSites: defaultEnabledSites(), // all supported sites on, from the registry
   customDomains: [],
   disabledCategories: [],
-  allowRewrite: false, // true only after explicit B2 consent
-  rewriteApiEndpoint: DEFAULT_REWRITE_ENDPOINT,
   analyticsEnabled: true, // opt-out
   onboardingComplete: false,
   riskySubmissionsCaught: 0, // lifetime counter shown in popup
@@ -32,7 +30,6 @@ export const MSG = Object.freeze({
   SET_SETTINGS: 'SET_SETTINGS',
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   RECORD_CATCH: 'RECORD_CATCH',
-  REWRITE: 'REWRITE', // content -> SW: perform the (only) cloud rewrite call
 });
 
 /** Deep-ish merge of stored values over defaults (enabledSites merged by key). */
@@ -44,20 +41,10 @@ export function withDefaults(stored = {}) {
   };
 }
 
-/** A rewrite endpoint must be a valid https:// URL (prevents prompt exfil). */
-export function isValidEndpoint(url) {
-  try {
-    return new URL(url).protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Whitelist + type-check an incoming settings patch. Untrusted callers can only
- * ever write known keys with valid values — never arbitrary storage entries,
- * and never a non-https rewrite endpoint. This is the security boundary for
- * SET_SETTINGS.
+ * ever write known keys with valid values, never arbitrary storage entries.
+ * This is the security boundary for SET_SETTINGS.
  */
 export function sanitizePatch(patch = {}) {
   const out = {};
@@ -86,10 +73,6 @@ export function sanitizePatch(patch = {}) {
     out.disabledCategories = patch.disabledCategories
       .filter((c) => typeof c === 'string')
       .slice(0, 50);
-  }
-  if (has('allowRewrite')) out.allowRewrite = !!patch.allowRewrite;
-  if (has('rewriteApiEndpoint') && isValidEndpoint(patch.rewriteApiEndpoint)) {
-    out.rewriteApiEndpoint = patch.rewriteApiEndpoint;
   }
   if (has('analyticsEnabled')) out.analyticsEnabled = !!patch.analyticsEnabled;
   if (has('onboardingComplete')) out.onboardingComplete = !!patch.onboardingComplete;

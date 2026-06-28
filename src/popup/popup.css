@@ -21,11 +21,10 @@ body.asg-root {
   font-size: var(--text-md);
 }
 .wordmark__dot {
-  width: 16px;
-  height: 16px;
-  border-radius: var(--radius-sm);
-  background: var(--color-trust);
+  width: 18px;
+  height: 18px;
   display: inline-block;
+  /* background (the shield+keyhole mark) is set from the shared logo source in popup.js */
 }
 .status {
   color: var(--color-muted);

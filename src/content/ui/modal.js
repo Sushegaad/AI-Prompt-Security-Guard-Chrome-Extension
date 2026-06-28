@@ -2,7 +2,7 @@
  * AI Safety Guard — Screen A2: Pre-Submit Warning Modal (the centerpiece)
  * ----------------------------------------------------------------------------
  * Appears when the user tries to send and the risk meets the sensitivity
- * threshold. Owns a single shadow-root overlay shared by A2 → B1 → B2.
+ * threshold. Owns a single shadow-root overlay shared by A2 → B1 (redact).
  *
  * Only MASKED values are ever rendered — the raw secret never enters the DOM.
  * ========================================================================== */
@@ -11,8 +11,6 @@ import { createShadowHost } from './shadow-style.js';
 import { RISK } from '../../shared/constants.js';
 import { h, riskClass } from '../../shared/h.js';
 import { renderRedactReview } from './redact-review.js';
-import { renderRewritePanel } from './rewrite-panel.js';
-import { removalNote } from '../rewriter.js';
 
 export function createModal(doc = document) {
   let host = null;
@@ -118,7 +116,6 @@ export function createModal(doc = document) {
 
     const actions = h('div.asg-actions', {}, [
       h('button.asg-btn.asg-btn--primary', { text: 'Redact sensitive data', onclick: handleRedact }),
-      h('button.asg-btn.asg-btn--secondary', { text: 'Rewrite it safely', onclick: handleRewrite }),
       h('div.asg-row', {}, [
         h('button.asg-btn.asg-btn--link', {
           text: 'Send anyway',
@@ -154,65 +151,6 @@ export function createModal(doc = document) {
         },
       })
     );
-  }
-
-  /* ----------------------------- B2: rewrite ---------------------------- */
-  async function handleRewrite() {
-    const cfg = await ctx.services.getRewriteConfig();
-    const isLocal = cfg.mode === 'local';
-    const state = {
-      mode: cfg.mode || 'cloud',
-      // Local generalization needs no consent (nothing leaves the device).
-      allowRewrite: isLocal ? true : !!cfg.allowRewrite,
-      endpoint: cfg.endpoint,
-      safer: null,
-      removed: removalNote(ctx.result.categories, ctx.services.categoryMeta),
-      busy: false,
-      error: null,
-    };
-
-    const draw = () =>
-      setBody(
-        renderRewritePanel({
-          original: ctx.text,
-          safer: state.safer,
-          removed: state.removed,
-          mode: state.mode,
-          allowRewrite: state.allowRewrite,
-          endpoint: state.endpoint,
-          busy: state.busy,
-          error: state.error,
-          onEnableConsent: async () => {
-            await ctx.services.setConsent();
-            state.allowRewrite = true;
-            draw();
-            triggerRewrite();
-          },
-          onUseSafer: () => {
-            ctx.services.applyText(state.safer);
-            close();
-          },
-          onBack: renderWarning, // no network call
-        })
-      );
-
-    async function triggerRewrite() {
-      state.busy = true;
-      state.error = null;
-      draw();
-      try {
-        const out = await ctx.services.rewrite(ctx.text, ctx.result.categories);
-        state.safer = out.safeText;
-        if (out.removed) state.removed = 'Removed: ' + out.removed;
-      } catch {
-        state.error = 'Could not reach the rewrite service. Your text was not sent anywhere.';
-      }
-      state.busy = false;
-      draw();
-    }
-
-    draw();
-    if (state.allowRewrite) triggerRewrite();
   }
 
   /* ------------------------------- lifecycle ---------------------------- */

@@ -8,6 +8,7 @@
 import { MSG, withDefaults } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
 import { SITES } from '../shared/sites.js';
+import { logoDataUri } from '../shared/logo.js';
 import { h as el } from '../shared/h.js';
 
 // Site toggles shown in the popup, derived from the registry (Design v1 D).
@@ -31,6 +32,10 @@ export function initPopup(opts = {}) {
 
   function render() {
     body.textContent = '';
+
+    // Brand mark in the header (shield + keyhole), from the single logo source.
+    const dot = doc.querySelector('.wordmark__dot');
+    if (dot) dot.style.background = `url("${logoDataUri()}") center / contain no-repeat`;
 
     // --- Sensitivity ---
     const seg = el('div.segmented');

@@ -5,7 +5,7 @@
  * Tag may include .class tokens. Text children are added as text nodes, so user
  * content is NEVER interpreted as HTML (defends against host-page injection).
  *
- * Used by the shadow-DOM UI (badge/modal/redact/rewrite) and the extension
+ * Used by the shadow-DOM UI (badge/modal/redact) and the extension
  * pages (popup/onboarding) — one implementation, no duplication.
  * ========================================================================== */
 

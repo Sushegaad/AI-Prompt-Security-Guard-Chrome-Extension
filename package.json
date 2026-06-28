@@ -16,7 +16,8 @@
     "audit:privacy": "node scripts/privacy-audit.mjs",
     "lint:ext": "web-ext lint --source-dir dist",
     "start:chrome": "web-ext run -t chromium --source-dir dist",
-    "format": "prettier --write \"src/**/*.{js,css,html}\""
+    "format": "prettier --write \"src/**/*.{js,css,html}\"",
+    "gen:icons": "node scripts/gen-icons.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

@@ -20,8 +20,6 @@ globalThis.chrome = { runtime: { getURL: (p) => 'chrome-extension://test/' + p }
 
 const { detect } = await import('./detector.js');
 const { redact } = await import('./redactor.js');
-const { removalNote } = await import('./rewriter.js');
-const { CATEGORY } = await import('./detector.js');
 const { getAdapter } = await import('./sites/index.js');
 const { createBadge } = await import('./ui/badge.js');
 const { createModal } = await import('./ui/modal.js');
@@ -32,7 +30,6 @@ let pass = 0;
 let fail = 0;
 const fails = [];
 const ok = (n, c) => (c ? pass++ : (fail++, fails.push(n)));
-const tick = () => new Promise((r) => setTimeout(r, 0));
 
 const FIXTURE =
   'Draft a reply to this customer — Sarah Chen (sarah.chen@northwind.io), ' +
@@ -49,10 +46,6 @@ const FIXTURE =
   ok('redact: raw secret removed', !redactedText.includes('sk-live-9fK2pQ7xR4mZ8vB1'));
   ok('redact: raw email removed', !redactedText.includes('northwind.io'));
   ok('redact: re-scan is safe', detect(redactedText).riskLevel === 'safe');
-  ok(
-    'removalNote builds list',
-    removalNote(['email', 'api_key'], CATEGORY).startsWith('Removed:')
-  );
 }
 
 /* ----------------------------------------------------------- adapters ---- */
@@ -104,22 +97,15 @@ const FIXTURE =
 /* --------------------------------------------------- A2 modal centerpiece */
 let submitted = false;
 let appliedText = null;
-let consentSet = false;
 const services = {
   redact: (t, m) => redact(t, m),
   rescan: (t) => detect(t),
-  rewrite: async () => ({ safeText: 'Draft a warm reply to a customer about a billing change.', removed: 'names, emails, account IDs, API key' }),
-  getRewriteConfig: async () => ({ allowRewrite: false, endpoint: 'https://api.test/rewrite' }),
-  setConsent: async () => {
-    consentSet = true;
-  },
   applyText: (t) => {
     appliedText = t;
   },
   submit: () => {
     submitted = true;
   },
-  categoryMeta: CATEGORY,
   onCatch: () => {},
 };
 
@@ -151,9 +137,10 @@ ok('modal: raw email NEVER shown', !txt().includes('northwind.io'));
 ok('modal: customer name NOT a finding row', !txt().includes('Sarah Chen'));
 // exactly 3 finding rows
 ok('modal: exactly 3 findings', mroot.querySelectorAll('.asg-find').length === 3);
-// button order
-const order = ['Redact sensitive data', 'Rewrite it safely', 'Send anyway', 'Keep editing'];
-ok('modal: 4 buttons in order', order.every((l) => !!btn(l)));
+// button order (B2 "Rewrite it safely" removed for MVP)
+const order = ['Redact sensitive data', 'Send anyway', 'Keep editing'];
+ok('modal: 3 buttons in order', order.every((l) => !!btn(l)));
+ok('modal: no Rewrite button', !btn('Rewrite it safely'));
 // pills use desaturated palette classes
 ok('modal: critical pill present', !!mroot.querySelector('.asg-pill--critical'));
 
@@ -187,31 +174,6 @@ const looksGood = [...r2.querySelectorAll('button')].find(
 ok('B1: Looks good button present & enabled', looksGood && !looksGood.hasAttribute('disabled'));
 looksGood.click();
 ok('B1: Looks good triggers submit', submitted === true);
-modal.close();
-
-/* ------- B2 rewrite consent gate ------- */
-modal.open({ result, text: FIXTURE, sensitivity: 'balanced', services });
-let r3root = document.getElementById('asg-modal-host').shadowRoot;
-[...r3root.querySelectorAll('button')]
-  .find((b) => b.textContent.trim() === 'Rewrite it safely')
-  .click();
-await tick();
-r3root = document.getElementById('asg-modal-host').shadowRoot;
-ok('B2: two-column compare shown', r3root.textContent.includes('Your version') && r3root.textContent.includes('Safer version'));
-ok('B2: cloud disclosure shown', r3root.textContent.includes('off by default'));
-ok('B2: consent gate (no auto network)', !!([...r3root.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Turn on cloud rewrite')));
-// grant consent -> triggers injected rewrite
-[...r3root.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Turn on cloud rewrite').click();
-await tick();
-await tick();
-r3root = document.getElementById('asg-modal-host').shadowRoot;
-ok('B2: consent stored', consentSet === true);
-ok('B2: safer version populated', r3root.textContent.includes('Draft a warm reply'));
-ok('B2: removal note shown', r3root.textContent.toLowerCase().includes('removed:'));
-const useSafer = [...r3root.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Use safer version');
-ok('B2: Use safer version enabled', useSafer && !useSafer.hasAttribute('disabled'));
-useSafer.click();
-ok('B2: applies safer text to input', appliedText.includes('Draft a warm reply'));
 modal.close();
 
 /* ------------------------------------------------ writeback (hardening #4) */

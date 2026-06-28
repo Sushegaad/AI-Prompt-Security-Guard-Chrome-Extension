@@ -5,14 +5,13 @@
  *   - resolve the site adapter (DOM selectors)
  *   - MutationObserver re-attaches across SPA navigation
  *   - debounced scan drives the inline badge (A1)
- *   - capture-phase submit interception opens the warning modal (A2 → B1/B2)
+ *   - capture-phase submit interception opens the warning modal (A2 → B1 redact)
  *
- * Storage is read directly here for Phase 3; Phase 4 routes it through the
- * service worker. All scanning is local — the only network call is the B2
- * rewrite, and only after explicit consent.
+ * Settings are read through the service worker. Everything is on-device: there
+ * is no network call and nothing the user types ever leaves the browser.
  * ========================================================================== */
 
-import { detect, detectAsync, ASYNC_THRESHOLD, CATEGORY } from './detector.js';
+import { detect, detectAsync, ASYNC_THRESHOLD } from './detector.js';
 import { redact } from './redactor.js';
 import { readInput, writeInput } from './dom-utils.js';
 import { getAdapter } from './sites/index.js';
@@ -21,7 +20,7 @@ import { createBadge } from './ui/badge.js';
 import { createModal } from './ui/modal.js';
 import { loadFonts } from './ui/fonts.js';
 import { debounce } from '../shared/debounce.js';
-import { shouldInterrupt, DEFAULT_REWRITE_ENDPOINT } from '../shared/constants.js';
+import { shouldInterrupt } from '../shared/constants.js';
 import { MSG, withDefaults } from '../shared/storage.js';
 
 const settings = withDefaults({});
@@ -139,43 +138,14 @@ function openModal(result, text) {
     services: {
       redact: (t, matches) => redact(t, matches),
       rescan: (t) => detect(t),
-      // Rewrite is performed by the service worker (the only network egress).
-      rewrite: async (t, cats) => {
-        const r = await chrome.runtime.sendMessage({
-          type: MSG.REWRITE,
-          prompt: t,
-          categories: cats,
-        });
-        if (!r || r.error) throw new Error((r && r.error) || 'rewrite_failed');
-        return r;
-      },
-      getRewriteConfig: async () => {
-        const endpoint = settings.rewriteApiEndpoint;
-        // "local" = generalize on-device (no egress). "cloud" only when the user
-        // has configured a custom endpoint (then consent applies).
-        const mode = endpoint && endpoint !== DEFAULT_REWRITE_ENDPOINT ? 'cloud' : 'local';
-        return { mode, allowRewrite: settings.allowRewrite, endpoint };
-      },
-      setConsent: async () => {
-        settings.allowRewrite = true;
-        try {
-          await chrome.runtime.sendMessage({
-            type: MSG.SET_SETTINGS,
-            patch: { allowRewrite: true },
-          });
-        } catch {
-          /* ignore */
-        }
-      },
       applyText: (t) => writeInput(inputEl, t),
       submit: () => {
         suppressUntil = nowMs() + 400; // allow exactly the send we trigger next
         doSubmit();
       },
-      categoryMeta: CATEGORY,
       onCatch: () => {
         try {
-          chrome.runtime.sendMessage({ type: 'RECORD_CATCH' });
+          chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
         } catch {
           /* ignore */
         }

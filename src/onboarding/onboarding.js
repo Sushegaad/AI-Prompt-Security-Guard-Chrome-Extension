@@ -10,6 +10,7 @@
 import { MSG } from '../shared/storage.js';
 import { SENSITIVITY, DEFAULT_SENSITIVITY } from '../shared/constants.js';
 import { SITES } from '../shared/sites.js';
+import { logoDataUri } from '../shared/logo.js';
 import { h as el } from '../shared/h.js';
 
 export function initOnboarding(opts = {}) {
@@ -30,8 +31,15 @@ export function initOnboarding(opts = {}) {
     return el('div.step-meta', { text: `Step ${n} of 3` });
   }
 
+  function brandmark() {
+    const mark = el('div.brandmark');
+    mark.style.cssText = `width:56px;height:56px;margin-bottom:12px;background:url("${logoDataUri()}") center / contain no-repeat;`;
+    return mark;
+  }
+
   function step1() {
     return [
+      brandmark(),
       meta(1),
       el('h1', { text: 'A safety net for AI' }),
       el('div.benefit', {}, [el('span.tick', { text: '✓' }), 'Scans on your device']),

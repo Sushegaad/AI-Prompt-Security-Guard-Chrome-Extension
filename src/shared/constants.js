@@ -30,6 +30,7 @@ export const BRAND = Object.freeze({
   paper: '#F8F7F4',      // warm off-white background
   muted: '#6B7280',      // secondary labels, timestamps, footer copy
   trustHover: '#2F4BC4',
+  trustLight: '#5E73E6', // lighter shield facet in the logo mark
   trustSoft: '#EAEDFB',
   border: '#E6E4DF',
   surface: '#FFFFFF',
@@ -172,7 +173,4 @@ export function shouldShowBadge(riskLevel, sensitivityId) {
 }
 
 /* --- Misc app constants --------------------------------------------------- */
-// Default cloud-rewrite endpoint (B2). Configurable per user in settings.
-export const DEFAULT_REWRITE_ENDPOINT = 'https://api.aisafetyguard.app/v1/rewrite';
-
 // NOTE: the supported-site list lives in shared/sites.js (single source).
