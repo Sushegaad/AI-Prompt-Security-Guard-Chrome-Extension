@@ -26,6 +26,7 @@ const { getAdapter } = await import('./sites/index.js');
 const { createBadge } = await import('./ui/badge.js');
 const { createModal } = await import('./ui/modal.js');
 const { writeInput } = await import('./dom-utils.js');
+const { getShadowCss } = await import('./ui/shadow-style.js');
 
 let pass = 0;
 let fail = 0;
@@ -155,6 +156,15 @@ const order = ['Redact sensitive data', 'Rewrite it safely', 'Send anyway', 'Kee
 ok('modal: 4 buttons in order', order.every((l) => !!btn(l)));
 // pills use desaturated palette classes
 ok('modal: critical pill present', !!mroot.querySelector('.asg-pill--critical'));
+
+// typography (Design QA): masked values render in Spline Sans Mono (.asg-data)
+ok('type: masked value carries mono class', !!mroot.querySelector('.asg-find__val.asg-data'));
+{
+  const css = getShadowCss();
+  ok('type: shadow CSS declares Hanken Grotesk UI font', css.includes('Hanken Grotesk') && css.includes('--font-ui'));
+  ok('type: shadow CSS maps .asg-data to Spline mono', /--font-data:\s*"Spline Sans Mono"/.test(css) && /\.asg-data\s*\{[^}]*var\(--font-data\)/.test(css));
+  ok('type: no raw system-font fallback hardcoded on components', !/font-family:\s*(Arial|Helvetica|sans-serif)\s*;/.test(css.replace(/--font-(ui|data):[^;]+;/g, '')));
+}
 
 /* ------- Send anyway -> submit + close ------- */
 btn('Send anyway').click();
