@@ -23,6 +23,8 @@ If you try to send something risky, it pauses and shows a clear warning listing 
 - Attachment scanning. Attach a PDF or Word file and it scans the file's text on your device, including hidden comments and metadata.
 - Three sensitivity modes: Basic, Balanced, and Strict.
 - Per-site control and custom domains from a small popup.
+- Accessible. Fully keyboard operable with visible focus and screen-reader support, meeting WCAG 2.1 AA and Section 508.
+- Least privilege. Runs only on the supported AI sites and requests only the storage and offscreen permissions it actually uses.
 - No accounts, no ads, no prompt logging, and no network calls at all.
 
 ## Who is this for
@@ -47,6 +49,10 @@ Everyday AI users, employees using AI at work, students and researchers, freelan
 ## Privacy
 
 Scanning is local and there are no network calls. The extension stores only your settings and a single "risky sends caught" counter, never your text or files. Full policy: [PRIVACY.md](PRIVACY.md).
+
+## Accessibility and compliance
+
+The interface is built to WCAG 2.1 AA and Section 508: keyboard operable, with visible focus, programmatic labels, and a screen-reader friendly warning dialog. Conformance is covered by automated tests. A self-assessed Accessibility Conformance Report (VPAT), a Software Bill of Materials, and a security overview for organizations and government agencies are in the [Documentation](#documentation) section below.
 
 ## Documentation
 
