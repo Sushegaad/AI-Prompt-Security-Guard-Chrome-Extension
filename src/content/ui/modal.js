@@ -74,6 +74,17 @@ export function createModal(doc = document) {
     card.textContent = '';
     card.appendChild(head());
     card.appendChild(bodyNode);
+    // Name the dialog by its visible heading when there is one, so AT announces
+    // the real purpose ("Before you send this") rather than just the brand.
+    const title = card.querySelector('.asg-title');
+    if (title) {
+      if (!title.id) title.id = 'asg-dialog-title';
+      card.setAttribute('aria-labelledby', title.id);
+      card.removeAttribute('aria-label');
+    } else {
+      card.removeAttribute('aria-labelledby');
+      card.setAttribute('aria-label', 'AI Safety Guard');
+    }
     // Move focus into the dialog (first actionable control, else the card).
     const list = focusables();
     (list[0] || card).focus();
@@ -98,10 +109,10 @@ export function createModal(doc = document) {
       })
     );
 
-    const findings = h('div.asg-findings');
+    const findings = h('div.asg-findings', { role: 'list' });
     for (const m of ctx.result.matches.filter((x) => x.showInModal)) {
       findings.appendChild(
-        h('div.asg-find', {}, [
+        h('div.asg-find', { role: 'listitem' }, [
           h('span.asg-find__type', { text: m.type }),
           h('span.asg-find__val.asg-data', { text: m.maskedValue }),
           h('span.asg-pill.asg-pill--' + riskClass(m.risk), { text: RISK[m.risk].pillLabel }),
@@ -163,10 +174,10 @@ export function createModal(doc = document) {
 
     const findings = (opts.findings || []).filter((m) => m.showInModal);
     if (findings.length) {
-      const list = h('div.asg-findings');
+      const list = h('div.asg-findings', { role: 'list' });
       for (const m of findings) {
         list.appendChild(
-          h('div.asg-find', {}, [
+          h('div.asg-find', { role: 'listitem' }, [
             h('span.asg-find__type', { text: m.type }),
             h('span.asg-find__val.asg-data', { text: m.maskedValue }),
             h('span.asg-pill.asg-pill--' + riskClass(m.risk), { text: RISK[m.risk].pillLabel }),

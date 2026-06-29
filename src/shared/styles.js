@@ -158,5 +158,11 @@ export function componentCss() {
   font-weight: var(--weight-medium);
   cursor: pointer;
 }
+
+/* Visible keyboard focus (WCAG 2.4.7) — shared by pages and shadow UI. */
+.asg-btn:focus-visible {
+  outline: 2px solid var(--color-trust);
+  outline-offset: 2px;
+}
 `;
 }

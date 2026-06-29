@@ -85,8 +85,10 @@ body.asg-root {
 .switch {
   appearance: none;
   -webkit-appearance: none;
+  box-sizing: border-box;
   width: 36px;
   height: 20px;
+  border: 1px solid var(--color-muted);
   border-radius: var(--radius-pill);
   background: var(--color-border);
   position: relative;
@@ -95,12 +97,13 @@ body.asg-root {
 }
 .switch:checked {
   background: var(--color-trust);
+  border-color: var(--color-trust);
 }
 .switch::after {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: 1px;
+  left: 1px;
   width: 16px;
   height: 16px;
   border-radius: var(--radius-pill);
@@ -109,6 +112,15 @@ body.asg-root {
 }
 .switch:checked::after {
   transform: translateX(16px);
+}
+
+/* Visible keyboard focus on custom controls (WCAG 2.4.7). */
+.switch:focus-visible,
+.segmented__btn:focus-visible,
+.domain-add__input:focus-visible,
+.domain-chip button:focus-visible {
+  outline: 2px solid var(--color-trust);
+  outline-offset: 2px;
 }
 
 /* custom domain input */

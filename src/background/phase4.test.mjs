@@ -210,6 +210,20 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
     'onboarding: balanced preselected + RECOMMENDED',
     !!root.querySelector('.opt-card--selected .opt-card__rec')
   );
+  // a11y (508 remediation F1/F4): options are real, keyboard-operable buttons
+  // that expose their selected state, inside a labelled group.
+  ok(
+    'onboarding: options are real buttons (keyboard operable)',
+    [...root.querySelectorAll('.opt-card')].every((c) => c.tagName === 'BUTTON')
+  );
+  ok(
+    'onboarding: selected option exposes aria-pressed=true',
+    root.querySelector('.opt-card--selected').getAttribute('aria-pressed') === 'true'
+  );
+  ok(
+    'onboarding: sensitivity options in a labelled group',
+    !!root.querySelector('.opt-group[role="group"][aria-label]')
+  );
 
   // pick Strict, Continue -> step 3
   root.querySelector('.opt-card[data-mode="strict"]').click();

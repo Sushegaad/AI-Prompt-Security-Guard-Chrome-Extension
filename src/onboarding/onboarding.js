@@ -55,14 +55,20 @@ export function initOnboarding(opts = {}) {
   }
 
   function step2() {
+    // Real <button>s (not div[role=button]) so the options are keyboard
+    // focusable and Enter/Space activatable; aria-pressed exposes the choice.
     const cards = Object.values(SENSITIVITY).map((mode) => {
       const selected = state.sensitivity === mode.id;
-      return el('div' + (selected ? '.opt-card.opt-card--selected' : '.opt-card'), {
-        role: 'button',
+      return el('button' + (selected ? '.opt-card.opt-card--selected' : '.opt-card'), {
+        type: 'button',
+        'aria-pressed': String(selected),
         'data-mode': mode.id,
         onclick: () => {
           state.sensitivity = mode.id;
           render();
+          // Keep focus on the chosen option after the re-render.
+          const again = root.querySelector(`.opt-card[data-mode="${mode.id}"]`);
+          if (again) again.focus();
         },
       }, [
         el('div.opt-card__name', {}, [
@@ -76,7 +82,7 @@ export function initOnboarding(opts = {}) {
       meta(2),
       el('h1', { text: 'How careful should we be?' }),
       el('p.sub', { text: 'You can change this anytime.' }),
-      ...cards,
+      el('div.opt-group', { role: 'group', 'aria-label': 'Sensitivity level' }, cards),
       el('button.asg-btn.asg-btn--primary.cta', {
         type: 'button',
         text: 'Continue',
@@ -122,6 +128,13 @@ export function initOnboarding(opts = {}) {
   function go(n) {
     state.step = n;
     render();
+    // Move focus to the new step's heading so AT announces the change and the
+    // keyboard user is not dropped back to <body> (2.4.3 Focus Order).
+    const heading = root.querySelector('h1');
+    if (heading) {
+      heading.setAttribute('tabindex', '-1');
+      heading.focus();
+    }
   }
 
   async function finish(domainValue) {

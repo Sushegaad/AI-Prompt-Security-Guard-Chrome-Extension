@@ -38,7 +38,7 @@ export function initPopup(opts = {}) {
     if (dot) dot.style.background = `url("${logoDataUri()}") center / contain no-repeat`;
 
     // --- Sensitivity ---
-    const seg = el('div.segmented');
+    const seg = el('div.segmented', { role: 'group', 'aria-label': 'Sensitivity' });
     for (const mode of Object.values(SENSITIVITY)) {
       seg.appendChild(
         el('button.segmented__btn', {

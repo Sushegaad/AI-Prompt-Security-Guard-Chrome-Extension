@@ -66,6 +66,7 @@ function shadowOnlyCss() {
 .asg-wordmark { display: inline-flex; align-items: center; gap: ${SPACE.s2}; font-weight: var(--weight-medium); font-size: 13px; }
 .asg-wordmark__dot { width: 18px; height: 18px; background: url("${logoDataUri()}") center / contain no-repeat; display: inline-block; }
 .asg-x { background: none; border: none; color: var(--color-muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px; }
+.asg-x:focus-visible { outline: 2px solid var(--color-trust); outline-offset: 2px; }
 .asg-card__body { padding: ${SPACE.s3} ${SPACE.s4} ${SPACE.s4}; }
 .asg-title { font-weight: var(--weight-medium); font-size: 19px; margin: ${SPACE.s2} 0 ${SPACE.s1}; }
 .asg-subtitle { color: var(--color-muted); font-size: 14px; line-height: 1.5; margin: 0 0 ${SPACE.s3}; }

@@ -1,0 +1,343 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:18710074-8541-4863-abba-c1d748afa2ac",
+  "metadata": {
+    "timestamp": "2026-06-29T00:02:17.147Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "npm",
+          "version": "10.9.8"
+        },
+        {
+          "type": "application",
+          "name": "cyclonedx-npm",
+          "group": "@cyclonedx",
+          "version": "5.0.0",
+          "author": "Jan Kowalleck",
+          "description": "Create CycloneDX Software Bill of Materials (SBOM) from NPM projects.",
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "externalReferences": [
+            {
+              "url": "git+https://github.com/CycloneDX/cyclonedx-node-npm.git",
+              "type": "vcs",
+              "comment": "as detected from PackageJson property \"repository.url\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-node-npm#readme",
+              "type": "website",
+              "comment": "as detected from PackageJson property \"homepage\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-node-npm/issues",
+              "type": "issue-tracker",
+              "comment": "as detected from PackageJson property \"bugs.url\""
+            }
+          ]
+        },
+        {
+          "type": "library",
+          "name": "cyclonedx-library",
+          "group": "@cyclonedx",
+          "version": "10.1.0",
+          "author": "Jan Kowalleck",
+          "description": "Core functionality of CycloneDX for JavaScript (Node.js or WebBrowser).",
+          "licenses": [
+            {
+              "license": {
+                "id": "Apache-2.0"
+              }
+            }
+          ],
+          "externalReferences": [
+            {
+              "url": "git+https://github.com/CycloneDX/cyclonedx-javascript-library.git",
+              "type": "vcs",
+              "comment": "as detected from PackageJson property \"repository.url\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-javascript-library#readme",
+              "type": "website",
+              "comment": "as detected from PackageJson property \"homepage\""
+            },
+            {
+              "url": "https://github.com/CycloneDX/cyclonedx-javascript-library/issues",
+              "type": "issue-tracker",
+              "comment": "as detected from PackageJson property \"bugs.url\""
+            }
+          ]
+        }
+      ]
+    },
+    "component": {
+      "type": "application",
+      "name": "ai-safety-guard",
+      "version": "1.0.0",
+      "bom-ref": "ai-safety-guard@1.0.0",
+      "description": "A free Chrome extension that warns you before you send private information to an AI tool. Calm, plain-English, helpful — never punitive. Scanning happens on your device.",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/ai-safety-guard@1.0.0",
+      "properties": [
+        {
+          "name": "cdx:npm:package:private",
+          "value": "true"
+        },
+        {
+          "name": "cdx:npm:package:path",
+          "value": ""
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "fflate",
+      "version": "0.8.3",
+      "bom-ref": "ai-safety-guard@1.0.0|fflate@0.8.3",
+      "author": "Arjun Barrett",
+      "description": "High performance (de)compression in an 8kB package",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/fflate@0.8.3",
+      "externalReferences": [
+        {
+          "url": "git+https://github.com/101arrowz/fflate.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://101arrowz.github.io/fflate",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://github.com/101arrowz/fflate/issues",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        },
+        {
+          "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "b5b64db89acbc06529df3b2106d772e16f8e47166e221f1ae629722044030b9ad8d5fdd4db424caf2d0b977581cd4e7c1192ac12e2455e16f9830bfc0ac3ef80"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/fflate"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "pdfjs-dist",
+      "version": "6.1.200",
+      "bom-ref": "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200",
+      "description": "Generic build of Mozilla's PDF.js library.",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/pdfjs-dist@6.1.200",
+      "externalReferences": [
+        {
+          "url": "git+https://github.com/mozilla/pdf.js.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://mozilla.github.io/pdf.js/",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://github.com/mozilla/pdf.js/issues",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        },
+        {
+          "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.1.200.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "a3c328972ce2ae490badc76c69efc710e888717588ec34b9cc6a6fa96f314c2d9852c5b7d2b96d170d9b0c6bf0fdfb2451d10cad09b66ebebc8f30d2e411f6bf"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/pdfjs-dist"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "canvas",
+      "group": "@napi-rs",
+      "version": "1.0.1",
+      "bom-ref": "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1",
+      "description": "Canvas for Node.js with skia backend",
+      "scope": "optional",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas@1.0.1",
+      "externalReferences": [
+        {
+          "url": "git+https://github.com/Brooooooklyn/canvas.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://github.com/Brooooooklyn/canvas#readme",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://github.com/Brooooooklyn/canvas/issues",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        },
+        {
+          "url": "https://registry.npmjs.org/@napi-rs/canvas/-/canvas-1.0.1.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "98f0f8dc6ee95db4212066bbcf82294ffbd79b58db17c701335a18e54aa32fc2d269308d1a1362d8b89d73fd3e2f029b362a9bbff4ead099414702aef8b5b78b"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@napi-rs/canvas"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "canvas-linux-arm64-gnu",
+      "group": "@napi-rs",
+      "version": "1.0.1",
+      "bom-ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1",
+      "description": "Canvas for Node.js with skia backend",
+      "scope": "optional",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT",
+            "acknowledgement": "declared"
+          }
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-arm64-gnu@1.0.1",
+      "externalReferences": [
+        {
+          "url": "git+https://github.com/Brooooooklyn/canvas.git",
+          "type": "vcs",
+          "comment": "as detected from PackageJson property \"repository.url\""
+        },
+        {
+          "url": "https://github.com/Brooooooklyn/canvas#readme",
+          "type": "website",
+          "comment": "as detected from PackageJson property \"homepage\""
+        },
+        {
+          "url": "https://github.com/Brooooooklyn/canvas/issues",
+          "type": "issue-tracker",
+          "comment": "as detected from PackageJson property \"bugs.url\""
+        },
+        {
+          "url": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.1.tgz",
+          "type": "distribution",
+          "hashes": [
+            {
+              "alg": "SHA-512",
+              "content": "8bbe33a84879c85998c0792ccc5a3ee041f89790130f86d29491b6d625b68f9929aa23766f458df521bfc5dab63bad0c8d92b464b4aeddafd9dda400b260d0e4"
+            }
+          ],
+          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+        }
+      ],
+      "properties": [
+        {
+          "name": "cdx:npm:package:path",
+          "value": "node_modules/@napi-rs/canvas-linux-arm64-gnu"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "ai-safety-guard@1.0.0",
+      "dependsOn": [
+        "ai-safety-guard@1.0.0|fflate@0.8.3",
+        "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200"
+      ]
+    },
+    {
+      "ref": "ai-safety-guard@1.0.0|fflate@0.8.3"
+    },
+    {
+      "ref": "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200",
+      "dependsOn": [
+        "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1"
+      ]
+    },
+    {
+      "ref": "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1",
+      "dependsOn": [
+        "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1"
+      ]
+    },
+    {
+      "ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1"
+    }
+  ]
+}

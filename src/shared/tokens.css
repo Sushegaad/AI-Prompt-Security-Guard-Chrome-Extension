@@ -17,13 +17,13 @@
   --color-border: #E6E4DF;
   --color-surface: #FFFFFF;
   --color-on-trust: #FFFFFF;
-  --risk-safe-fg: #4F7A65;
+  --risk-safe-fg: #4A725F;
   --risk-safe-bg: #E8F0EB;
-  --risk-medium-fg: #94794A;
+  --risk-medium-fg: #7E673F;
   --risk-medium-bg: #F3EEDD;
-  --risk-high-fg: #B0795A;
+  --risk-high-fg: #8C5D43;
   --risk-high-bg: #F4E9DF;
-  --risk-critical-fg: #AB5A55;
+  --risk-critical-fg: #9A514C;
   --risk-critical-bg: #F4E3E1;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -124,4 +124,10 @@
   padding: 0;
   font-weight: var(--weight-medium);
   cursor: pointer;
+}
+
+/* Visible keyboard focus (WCAG 2.4.7) — shared by pages and shadow UI. */
+.asg-btn:focus-visible {
+  outline: 2px solid var(--color-trust);
+  outline-offset: 2px;
 }

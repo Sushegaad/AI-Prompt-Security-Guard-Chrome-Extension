@@ -52,6 +52,12 @@ Scanning is local and there are no network calls. The extension stores only your
 
 Practical guidance on using AI tools without leaking sensitive data: [AI Safety - Best Practices](docs/AI%20Safety%20-%20Best%20Practices.pdf).
 
+For organizations evaluating the extension, including government agencies:
+
+- [Federal security overview](docs/FEDERAL-SECURITY-OVERVIEW.md) - data flow, permissions, and secure-development summary.
+- [Accessibility Conformance Report (VPAT)](docs/VPAT.md) and the [accessibility audit](docs/ACCESSIBILITY-AUDIT.md) - WCAG 2.1 AA / Section 508.
+- [Software Bill of Materials](docs/sbom.cyclonedx.json) - CycloneDX, regenerate with `npm run gen:sbom`.
+
 ## Author
 
 Hemant Naik [LinkedIn](https://www.linkedin.com/in/tanaji-naik/) · [hemant.naik@gmail.com](mailto:hemant.naik@gmail.com)

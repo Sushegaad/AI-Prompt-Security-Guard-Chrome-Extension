@@ -68,28 +68,28 @@ export const RISK = Object.freeze({
     badgeLabel: 'Safe',
     badgeDescription: 'Nothing sensitive found.',
     pillLabel: 'SAFE',
-    fg: '#4F7A65', bg: '#E8F0EB',
+    fg: '#4A725F', bg: '#E8F0EB',
   }),
   medium: Object.freeze({
     id: 'medium', rank: 1,
     badgeLabel: 'Medium risk',
     badgeDescription: 'Possible personal or business info.',
     pillLabel: 'MEDIUM',
-    fg: '#94794A', bg: '#F3EEDD',
+    fg: '#7E673F', bg: '#F3EEDD',
   }),
   high: Object.freeze({
     id: 'high', rank: 2,
     badgeLabel: 'High risk',
     badgeDescription: 'Clear customer, legal or financial data.',
     pillLabel: 'HIGH',
-    fg: '#B0795A', bg: '#F4E9DF',
+    fg: '#8C5D43', bg: '#F4E9DF',
   }),
   critical: Object.freeze({
     id: 'critical', rank: 3,
     badgeLabel: 'Critical risk',
     badgeDescription: 'Credentials, keys, SSNs, cards. Always interrupts.',
     pillLabel: 'CRITICAL',
-    fg: '#AB5A55', bg: '#F4E3E1',
+    fg: '#9A514C', bg: '#F4E3E1',
   }),
 });
 

@@ -122,6 +122,17 @@ const btn = (label) => buttons().find((b) => b.textContent.trim() === label);
 ok('a11y: role=dialog', mroot.querySelector('.asg-card').getAttribute('role') === 'dialog');
 ok('a11y: aria-modal', mroot.querySelector('.asg-card').getAttribute('aria-modal') === 'true');
 ok('a11y: card focusable (tabindex -1)', mroot.querySelector('.asg-card').getAttribute('tabindex') === '-1');
+// a11y (508 remediation F4): dialog is named by its visible heading, not the brand
+{
+  const card = mroot.querySelector('.asg-card');
+  const labelId = card.getAttribute('aria-labelledby');
+  const labelEl = labelId && mroot.querySelector('#' + labelId);
+  ok('a11y: dialog labelled by its heading', !!labelEl && labelEl.textContent.includes('Before you send this'));
+  ok('a11y: dialog has no competing aria-label', !card.getAttribute('aria-label'));
+}
+// a11y (508 remediation F6): findings expose list semantics
+ok('a11y: findings container is a list', mroot.querySelector('.asg-findings').getAttribute('role') === 'list');
+ok('a11y: finding rows are listitems', [...mroot.querySelectorAll('.asg-find')].every((r) => r.getAttribute('role') === 'listitem'));
 
 ok('modal: title', txt().includes('Before you send this'));
 ok('modal: subtitle', txt().includes('could expose confidential data'));
