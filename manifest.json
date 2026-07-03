@@ -8,7 +8,8 @@
     "48": "assets/icons/icon48.png",
     "128": "assets/icons/icon128.png"
   },
-  "permissions": ["storage", "offscreen"],
+  "permissions": ["storage", "offscreen", "scripting"],
+  "optional_host_permissions": ["https://*/*"],
   "host_permissions": [
     "https://chatgpt.com/*",
     "https://chat.openai.com/*",

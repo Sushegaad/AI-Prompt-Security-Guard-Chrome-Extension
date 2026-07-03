@@ -11,6 +11,7 @@
 
 import { DEFAULT_SENSITIVITY, SENSITIVITY } from './constants.js';
 import { defaultEnabledSites } from './sites.js';
+import { normalizeHostname } from './domains.js';
 
 /** Full settings schema with defaults. */
 export const DEFAULT_SETTINGS = Object.freeze({
@@ -82,11 +83,13 @@ export function sanitizePatch(patch = {}) {
     out.enabledSites = sites;
   }
   if (has('customDomains') && Array.isArray(patch.customDomains)) {
-    out.customDomains = patch.customDomains
-      .filter((d) => typeof d === 'string')
-      .map((d) => d.trim().toLowerCase().replace(/^https?:\/\//, ''))
-      .filter((d) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d))
-      .slice(0, 50);
+    // Same validator the popup uses (shared/domains.js) — the two can't drift.
+    out.customDomains = [...new Set(
+      patch.customDomains
+        .filter((d) => typeof d === 'string')
+        .map((d) => normalizeHostname(d).host)
+        .filter(Boolean)
+    )].slice(0, 50);
   }
   if (has('disabledCategories') && Array.isArray(patch.disabledCategories)) {
     out.disabledCategories = patch.disabledCategories

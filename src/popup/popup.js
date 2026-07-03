@@ -8,6 +8,7 @@
 import { MSG, withDefaults } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
 import { CATEGORY } from '../content/detector.js';
+import { normalizeHostname, originFor } from '../shared/domains.js';
 import { SITES } from '../shared/sites.js';
 import { logoDataUri } from '../shared/logo.js';
 import { h as el } from '../shared/h.js';
@@ -67,19 +68,52 @@ export function initPopup(opts = {}) {
       ])
     );
 
-    // custom domains
+    // custom domains (experimental) — per-site permission requested on add
     const input = el('input.domain-add__input', {
       type: 'text',
       placeholder: '+ Add a custom AI domain',
-      'aria-label': 'Add a custom AI domain',
+      'aria-label': 'Add a custom AI domain (experimental)',
     });
-    const addDomain = () => {
-      const v = (input.value || '').trim().toLowerCase().replace(/^https?:\/\//, '');
-      if (v && !settings.customDomains.includes(v)) {
-        persist({ customDomains: [...settings.customDomains, v] });
-      }
-      input.value = '';
+    const domainStatus = el('p.domain-status', { role: 'status', 'aria-live': 'polite' });
+    const setStatus = (msg, isError) => {
+      domainStatus.textContent = msg || '';
+      domainStatus.classList.toggle('domain-status--error', !!isError);
     };
+    const addDomain = () => {
+      const { host, error } = normalizeHostname(input.value);
+      if (error) {
+        setStatus(error, true);
+        return;
+      }
+      if (settings.customDomains.includes(host)) {
+        setStatus('Already added.', false);
+        input.value = '';
+        return;
+      }
+      // chrome.permissions.request MUST be the first async call in the click
+      // handler (user-gesture requirement) — no await before it. Outside a
+      // real extension context (tests), treat the grant as given.
+      const request =
+        typeof chrome !== 'undefined' && chrome.permissions && chrome.permissions.request
+          ? chrome.permissions.request({ origins: [originFor(host)] })
+          : Promise.resolve(true);
+      Promise.resolve(request)
+        .then((granted) => {
+          if (!granted) {
+            setStatus(`Permission declined — ${host} was not added.`, true);
+            return;
+          }
+          input.value = '';
+          setStatus(`Watching ${host}. Reload any open ${host} tabs once.`, false);
+          // The service worker owns registration: persisting customDomains
+          // triggers its reconcile (register script for the granted origin).
+          return persist({ customDomains: [...settings.customDomains, host] });
+        })
+        .catch(() => setStatus('Chrome refused the permission request. Try again.', true));
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addDomain();
+    });
     const domainAdd = el('div.domain-add', {}, [
       input,
       el('button.asg-btn.asg-btn--secondary', { type: 'button', text: 'Add', onclick: addDomain }),
@@ -105,7 +139,11 @@ export function initPopup(opts = {}) {
       el('div.section', {}, [
         el('p.section__label', { text: 'Watch these sites' }),
         ...siteRows,
+        el('p.section__hint', {
+          text: 'Custom domains (experimental): Chrome will ask permission for that site only.',
+        }),
         domainAdd,
+        domainStatus,
         chips,
       ])
     );

@@ -22,9 +22,9 @@ If you try to send something risky, it pauses and shows a clear warning listing 
 - One-click redaction that swaps sensitive values for labels like [EMAIL] and [API_KEY].
 - Attachment scanning. Attach a PDF or Word file and it scans the file's text on your device, including hidden comments and metadata.
 - Three sensitivity modes: Basic, Balanced, and Strict.
-- Per-site control and custom domains from a small popup.
+- Per-site control from a small popup, plus experimental custom domains: add any https AI site and Chrome asks you to grant access for that one site only.
 - Accessible. Fully keyboard operable with visible focus and screen-reader support, meeting WCAG 2.1 AA and Section 508.
-- Least privilege. Runs only on the supported AI sites and requests only the storage and offscreen permissions it actually uses.
+- Least privilege. Runs only on the supported AI sites by default; custom domains are granted per-site at the moment you add them, never as blanket access.
 - No accounts, no ads, no prompt logging, and no network calls at all.
 
 ## Who is this for
@@ -38,6 +38,14 @@ Everyday AI users, employees using AI at work, students and researchers, freelan
 3. Click "Load unpacked" and select the `dist` folder.
 4. The setup screen opens on first install. Choose your sensitivity and the sites to watch.
 
+### Adding a custom domain (experimental)
+
+1. Open the popup and type the domain (e.g. `chat.example.com`) under "Watch these sites".
+2. Chrome shows a permission prompt for that site only — approve it.
+3. Reload any open tabs of that site once. A generic adapter finds the prompt box on a best-effort basis; sites with unusual composers may not be fully supported.
+
+Removing the domain from the popup unregisters the scanner and withdraws the site permission.
+
 ## Common issues
 
 **Fonts look wrong on a site.** Some sites have a strict Content Security Policy. The extension loads its own fonts to work around this; if you see a system font, reload the tab once.
@@ -45,6 +53,8 @@ Everyday AI users, employees using AI at work, students and researchers, freelan
 **Badge or warning does not appear.** AI sites change their layout often. Reopen the popup and confirm the site toggle is on. If it still does not appear, check the console for a message starting with `[AI Safety Guard]`.
 
 **Nothing is saved.** Settings live in browser local storage. Locked-down or guest profiles that block extension storage will not persist preferences.
+
+**A custom domain stopped working.** If you revoked the site's permission from `chrome://extensions` → Details → Site access, the scanner was automatically unregistered. Remove the domain in the popup and add it again to re-grant access.
 
 ## Privacy
 

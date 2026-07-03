@@ -276,6 +276,11 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   ok('manifest: host_permissions match registry', eq(manifest.host_permissions));
   ok('manifest: content_scripts.matches match registry', eq(manifest.content_scripts[0].matches));
   ok('manifest: web_accessible_resources.matches match registry', eq(manifest.web_accessible_resources[0].matches));
+  // Custom-domain support (Workstream 3): dynamic registration needs scripting,
+  // and per-site grants ride on optional_host_permissions — never host_permissions.
+  ok('manifest: scripting permission present', manifest.permissions.includes('scripting'));
+  ok('manifest: optional_host_permissions is exactly https://*/*', JSON.stringify(manifest.optional_host_permissions) === JSON.stringify(['https://*/*']));
+  ok('manifest: broad pattern NOT in host_permissions', !manifest.host_permissions.includes('https://*/*') && !manifest.host_permissions.includes('<all_urls>'));
 
   // Adapter dispatcher derives from the registry (no per-site files).
   globalThis.location = { hostname: 'chatgpt.com' };

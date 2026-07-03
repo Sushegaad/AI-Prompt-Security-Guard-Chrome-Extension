@@ -9,13 +9,92 @@
  * ========================================================================== */
 
 import { MSG, readSettings, writeSettings, bumpCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
+import { scriptIdFor, originFor } from '../shared/domains.js';
 
 /* --- First run: open onboarding ------------------------------------------ */
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/onboarding/onboarding.html') });
   }
+  reconcileCustomDomains().catch(() => {});
 });
+chrome.runtime.onStartup?.addListener(() => {
+  reconcileCustomDomains().catch(() => {});
+});
+// A grant revoked from chrome://extensions should prune its registration
+// immediately, not at the next browser start.
+chrome.permissions?.onRemoved?.addListener(() => {
+  reconcileCustomDomains().catch(() => {});
+});
+
+/* --- Custom domains: dynamic content-script reconciliation ----------------
+ * The SERVICE WORKER is the single owner of chrome.scripting registrations.
+ * The popup only requests the permission grant (user gesture) and persists
+ * settings.customDomains; this reconcile makes reality match the settings:
+ *   - register a script for every wanted domain whose origin is granted
+ *   - unregister scripts for domains that were removed or whose grant was
+ *     revoked via chrome://extensions (the known Chrome quirk: dynamic
+ *     registrations survive a revoked grant)
+ *   - drop grants for origins the user no longer wants
+ * Runs on install, startup, permission revocation, and settings writes.
+ * Exported (with injectable deps) for tests.
+ * ------------------------------------------------------------------------- */
+const SCRIPT_ID_PREFIX = 'aisg-';
+// The BUILT content bundle: webpack mirrors the source tree into dist/, and
+// the packed extension is dist/, so this path is valid at runtime.
+const CONTENT_SCRIPT_JS = 'src/content/content.js';
+
+export async function reconcileCustomDomains(deps = {}) {
+  const read = deps.readSettings || readSettings;
+  const scripting = deps.scripting || (typeof chrome !== 'undefined' && chrome.scripting);
+  const permissions = deps.permissions || (typeof chrome !== 'undefined' && chrome.permissions);
+  if (!scripting || !permissions) return { registered: [], unregistered: [], revoked: [] };
+
+  const settings = await read();
+  const wanted = new Set(settings.customDomains || []);
+
+  const grantedOrigins = new Set(((await permissions.getAll()) || {}).origins || []);
+  const registered = (await scripting.getRegisteredContentScripts()) || [];
+  const ours = registered.filter((s) => s.id && s.id.startsWith(SCRIPT_ID_PREFIX));
+  const registeredHosts = new Set(ours.map((s) => s.id.slice(SCRIPT_ID_PREFIX.length)));
+
+  const toRegister = [...wanted].filter(
+    (host) => grantedOrigins.has(originFor(host)) && !registeredHosts.has(host)
+  );
+  const toUnregister = [...registeredHosts].filter(
+    (host) => !wanted.has(host) || !grantedOrigins.has(originFor(host))
+  );
+  // Revoke grants for custom domains the user removed. Only origins that map
+  // to one of OUR dynamic registrations qualify — the six static host grants
+  // never have an aisg- registration, so they can never be touched here.
+  const toRevoke = [...grantedOrigins].filter((origin) => {
+    const m = /^https:\/\/([^/*]+)\/\*$/.exec(origin);
+    return !!m && !wanted.has(m[1]) && registeredHosts.has(m[1]);
+  });
+
+  if (toRegister.length) {
+    await scripting.registerContentScripts(
+      toRegister.map((host) => ({
+        id: scriptIdFor(host),
+        matches: [originFor(host)],
+        js: [CONTENT_SCRIPT_JS],
+        runAt: 'document_idle',
+        persistAcrossSessions: true,
+      }))
+    );
+  }
+  if (toUnregister.length) {
+    await scripting.unregisterContentScripts({ ids: toUnregister.map(scriptIdFor) });
+  }
+  for (const origin of toRevoke) {
+    try {
+      await permissions.remove({ origins: [origin] });
+    } catch {
+      /* revoking an already-gone grant is fine */
+    }
+  }
+  return { registered: toRegister, unregistered: toUnregister, revoked: toRevoke };
+}
 
 /* --- Broadcast settings to every content script -------------------------- */
 async function broadcastSettings(settings) {
@@ -96,6 +175,15 @@ export async function routeMessage(msg, deps = {}) {
       return read();
     case MSG.SET_SETTINGS: {
       const settings = await write(msg.patch || {});
+      // Keep dynamic registrations in step when customDomains change.
+      if (msg.patch && 'customDomains' in msg.patch) {
+        const reconcile = deps.reconcile || reconcileCustomDomains;
+        try {
+          await reconcile(deps);
+        } catch {
+          /* reconciliation is self-healing on next startup */
+        }
+      }
       await broadcast(settings);
       return settings;
     }
