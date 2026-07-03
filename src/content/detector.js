@@ -19,6 +19,9 @@
  * showInModal: identifier/secret findings are true; a bare customer NAME is
  * false (the design's A2 modal shows the account + email, not the name), but
  * the name match is still produced so B1 redaction can replace it with [NAME].
+ *
+ * Match offsets (start/end) always refer to the ORIGINAL input string, even
+ * though scanning runs on a normalized copy (zero-width chars stripped).
  * ========================================================================== */
 
 import RULES from '../shared/rules.json' with { type: 'json' };
@@ -39,6 +42,8 @@ export const CATEGORY = {
   api_key:        { type: 'API key',          summary: 'API key',           redactLabel: '[API_KEY]', risk: 'critical' },
   password:       { type: 'Password',         summary: 'password',          redactLabel: '[SECRET]',  risk: 'critical' },
   connection_string:{ type: 'Database URL',   summary: 'database URL',      redactLabel: '[DB_URL]',  risk: 'critical' },
+  private_key:    { type: 'Private key (PEM)', summary: 'private key',      redactLabel: '[PRIVATE_KEY]', risk: 'critical' },
+  iban:           { type: 'IBAN',             summary: 'IBAN',              redactLabel: '[IBAN]',    risk: 'critical' },
   credit_card:    { type: 'Credit card',      summary: 'credit card',       redactLabel: '[CARD]',    risk: 'critical' },
   ssn:            { type: 'SSN',              summary: 'SSN',               redactLabel: '[SSN]',     risk: 'critical' },
   account_number: { type: 'Account number',   summary: 'account number',    redactLabel: '[ACCOUNT]', risk: 'high' },
@@ -98,6 +103,69 @@ export function luhnValid(digits) {
   return sum % 10 === 0;
 }
 
+/* --- Input normalization ----------------------------------------------------
+ * Zero-width characters (U+200B/C/D, U+2060, U+FEFF) routinely survive
+ * copy/paste from rich-text sources and split secrets invisibly. We scan a
+ * stripped copy and map match offsets back to the ORIGINAL string so
+ * redaction spans stay correct.
+ * -------------------------------------------------------------------------- */
+const ZERO_WIDTH = /\u200B|\u200C|\u200D|\u2060|\uFEFF/;
+
+export function stripZeroWidth(text) {
+  if (!ZERO_WIDTH.test(text)) return { text, toOrig: null };
+  let norm = '';
+  const map = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ZERO_WIDTH.test(ch)) continue;
+    map.push(i);
+    norm += ch;
+  }
+  return {
+    text: norm,
+    toOrig: (start, end) => ({ start: map[start], end: map[end - 1] + 1 }),
+  };
+}
+
+/* Shadow copy with intra-token newlines removed (secret pasted with a line
+ * wrap). Returns the joined text plus an index map back to the input. */
+function joinLines(text) {
+  let out = '';
+  const map = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\n' && i > 0 && i + 1 < text.length && /\S/.test(text[i - 1]) && /\S/.test(text[i + 1])) {
+      continue;
+    }
+    map.push(i);
+    out += ch;
+  }
+  return { text: out, map };
+}
+
+/* --- IBAN validation (mod-97, ISO 13616) — same spirit as luhnValid -------- */
+export const IBAN_LENGTHS = {
+  AD: 24, AE: 23, AT: 20, BE: 16, BG: 22, BR: 29, CH: 21, CY: 28, CZ: 24,
+  DE: 22, DK: 18, EE: 20, ES: 24, FI: 18, FR: 27, GB: 22, GR: 27, HR: 21,
+  HU: 28, IE: 22, IL: 23, IS: 26, IT: 27, LI: 21, LT: 20, LU: 20, LV: 21,
+  MC: 27, MT: 31, NL: 18, NO: 15, PL: 28, PT: 25, RO: 24, SA: 24, SE: 24,
+  SI: 19, SK: 24, TR: 26,
+};
+
+export function ibanValid(compact) {
+  const m = /^([A-Z]{2})(\d{2})([A-Z0-9]{11,30})$/.exec(compact);
+  if (!m) return false;
+  const expected = IBAN_LENGTHS[m[1]];
+  if (!expected || compact.length !== expected) return false;
+  const rearranged = compact.slice(4) + compact.slice(0, 4);
+  let rem = 0;
+  for (const ch of rearranged) {
+    const v = ch >= '0' && ch <= '9' ? ch : String(ch.charCodeAt(0) - 55);
+    for (const d of v) rem = (rem * 10 + (d.charCodeAt(0) - 48)) % 97;
+  }
+  return rem === 1;
+}
+
 const DOTS = '••••'; // ••••
 const ELLIPSIS = '…'; // …
 
@@ -117,6 +185,14 @@ export const mask = {
   connection_string(raw) {
     // postgres://user:pass@host  ->  postgres://user:••••@host (hide only the password)
     return String(raw).replace(/(:\/\/[^\s:/@]+:)[^\s:/@]+(@)/, '$1' + DOTS + '$2');
+  },
+  private_key() {
+    // Never render any part of the key material — the header is enough.
+    return '-----BEGIN ' + DOTS + '-----';
+  },
+  iban(raw) {
+    const c = String(raw).replace(/\s+/g, '');
+    return c.slice(0, 4) + DOTS + c.slice(-4); // country + check digits … last 4
   },
   credit_card(raw) {
     const d = raw.replace(/\D/g, '');
@@ -186,7 +262,22 @@ const RE = {
   phone:
     /(?:\+?\d{1,3}[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]\d{3}[\s.-]\d{4}\b/g,
   ssn: /\b(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b/g,
-  ccCandidate: /\b(?:\d[ -]?){13,16}\b/g,
+  // Keyword-anchored SSN — catches dash-less and space-separated forms while the
+  // anchor keeps phone/zip/order-number collisions out.
+  ssnAnchored:
+    /\b(?:ssn|social\s+security(?:\s+(?:number|no\.?|#))?|soc\s*sec)\b[\s:.#-]*(?:is|was|number|no\.?)?[\s:#-]*(\d{3})[\s-]?(\d{2})[\s-]?(\d{4})\b/gi,
+  // Separators widened to space/hyphen/dot ("4111.1111.1111.1111"); Luhn gates FPs.
+  ccCandidate: /\b(?:\d[ .-]?){13,16}\b/g,
+  // PEM private-key material — the BEGIN header alone fires (pastes get truncated).
+  pem: /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----(?:[\s\S]*?-----END [A-Z0-9 ]*PRIVATE KEY-----)?/g,
+  // JWT: three base64url segments, first decoding to '{"' ("eyJ").
+  jwt: /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g,
+  // Credential-bearing webhook URLs (Slack, Discord, Microsoft Teams/Outlook).
+  webhookUrl:
+    /\bhttps:\/\/(?:hooks\.slack\.com\/services\/[A-Za-z0-9/_-]+|discord(?:app)?\.com\/api\/webhooks\/[A-Za-z0-9/_-]+|[a-z0-9-]+\.webhook\.office\.com\/webhookb2\/[^\s"'<>]+|outlook\.office\.com\/webhook\/[^\s"'<>]+)/gi,
+  // Bare IBAN candidate (optionally space-grouped); ibanValid() (mod-97 +
+  // country length) is the real gate, mirroring the Luhn approach for cards.
+  ibanCandidate: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]){11,32}\b/g,
   account: /(?:\baccount\b|\bacct\b|\ba\/c\b)?\s*#\s?(\d{4,})\b/gi,
   accountWord: /\b(?:account|acct)\s*(?:number|no\.?|#)?\s*:?\s*(\d{4,})\b/gi,
   apiPrefixed:
@@ -228,15 +319,33 @@ function pushAll(out, re, category, text, validate) {
 }
 
 // Tokens for generic high-entropy secret detection.
+/* Charset-relative thresholds. A flat >4.0 gate makes hex-only secrets
+ * UNDETECTABLE: hex max entropy is log2(16) = 4.0 exactly. Azure, Mailchimp
+ * and many vendor keys are pure hex, so hex gets its own threshold. */
+const ENTROPY_THRESHOLDS = { hex: 3.4, base64ish: 4.0 };
+const HEX_MIN_LENGTH = 28; // dodges 24-hex Mongo ObjectIds; 32-hex keys still caught
+const HASH_CONTEXT = /\b(?:commit|sha-?\d*|hash|md5|checksum|digest|etag)\b[\s:=("'`-]*$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function detectGenericSecrets(out, text) {
   const tokenRe = /[A-Za-z0-9_\-+/=.]{20,}/g;
   for (const m of text.matchAll(tokenRe)) {
     const tok = m[0];
     if (tok.includes('@')) continue; // emails handled elsewhere
+    if (UUID_RE.test(tok)) continue; // request/trace ids, not secrets
     const hasLetter = /[A-Za-z]/.test(tok);
     const hasDigit = /\d/.test(tok);
     if (!(hasLetter && hasDigit)) continue;
-    if (shannonEntropy(tok) <= 4.0) continue;
+    const isHex = /^[0-9a-f]+$/i.test(tok);
+    if (isHex) {
+      if (tok.length < HEX_MIN_LENGTH) continue;
+      // Hex blobs pasted as *hashes* (git SHAs, checksums) are public values —
+      // skip when the preceding context says so.
+      if (HASH_CONTEXT.test(text.slice(Math.max(0, m.index - 24), m.index))) continue;
+      if (shannonEntropy(tok) <= ENTROPY_THRESHOLDS.hex) continue;
+    } else {
+      if (shannonEntropy(tok) <= ENTROPY_THRESHOLDS.base64ish) continue;
+    }
     out.push({ category: 'api_key', rawValue: tok, start: m.index, end: m.index + tok.length });
   }
 }
@@ -318,16 +427,36 @@ function deOverlap(matches) {
 /* ============================================================================
  * Core detect()
  * ========================================================================== */
-export function detect(text) {
+export function detect(input) {
   const t0 = now();
   const raw = [];
 
-  if (typeof text !== 'string' || text.length === 0) {
+  if (typeof input !== 'string' || input.length === 0) {
     return { riskLevel: 'safe', categories: [], matches: [], summary: '', scanMs: 0 };
   }
 
+  // Normalize: scan a zero-width-stripped copy; offsets map back at the end.
+  const { text, toOrig } = stripZeroWidth(input);
+
   // --- Critical: secrets & regulated identifiers ---
   pushAll(raw, RE.apiPrefixed, 'api_key', text);
+  pushAll(raw, RE.pem, 'private_key', text);
+  pushAll(raw, RE.jwt, 'api_key', text);
+  pushAll(raw, RE.webhookUrl, 'api_key', text);
+  // Second pass for secrets split by a line wrap: join intra-token newlines
+  // and map any *new* API-key hits back to real offsets.
+  if (text.includes('\n')) {
+    const joined = joinLines(text);
+    if (joined.text.length !== text.length) {
+      for (const reKey of ['apiPrefixed', 'jwt']) {
+        for (const m of joined.text.matchAll(RE[reKey])) {
+          const start = joined.map[m.index];
+          const end = joined.map[m.index + m[0].length - 1] + 1;
+          raw.push({ category: 'api_key', rawValue: m[0], start, end });
+        }
+      }
+    }
+  }
   for (const m of text.matchAll(RE.bearer)) {
     raw.push({ category: 'api_key', rawValue: m[1], start: m.index + m[0].indexOf(m[1]), end: m.index + m[0].indexOf(m[1]) + m[1].length });
   }
@@ -341,8 +470,21 @@ export function detect(text) {
     raw.push({ category: 'password', rawValue: m[1], start: m.index, end: m.index + m[1].length });
   }
   pushAll(raw, RE.connectionUri, 'connection_string', text);
-  pushAll(raw, RE.ccCandidate, 'credit_card', text, (m) => luhnValid(m[0].replace(/\D/g, '')));
+  pushAll(
+    raw, RE.ccCandidate, 'credit_card', text,
+    (m) => !m[0].includes('..') && luhnValid(m[0].replace(/\D/g, ''))
+  );
   pushAll(raw, RE.ssn, 'ssn', text);
+  // Keyword-anchored SSN (dash-less / spaced), same area/group/serial rules.
+  for (const m of text.matchAll(RE.ssnAnchored)) {
+    const [area, group, serial] = [m[1], m[2], m[3]];
+    if (area === '000' || area === '666' || area[0] === '9') continue;
+    if (group === '00' || serial === '0000') continue;
+    const digitsStart = m.index + m[0].search(/\d/);
+    raw.push({ category: 'ssn', rawValue: text.slice(digitsStart, m.index + m[0].length), start: digitsStart, end: m.index + m[0].length });
+  }
+  // Bare IBANs — candidate shape gated by mod-97 checksum + country length.
+  pushAll(raw, RE.ibanCandidate, 'iban', text, (m) => ibanValid(m[0].replace(/\s+/g, '')));
   // Government IDs (passport, driver's license, national/residence/tax IDs).
   for (const reKey of ['passport', 'driversLicense', 'nationalId']) {
     for (const m of text.matchAll(RE[reKey])) {
@@ -355,7 +497,11 @@ export function detect(text) {
 
   // --- High: account, health, financial, legal, internal urls ---
   for (const m of text.matchAll(RE.account)) {
-    raw.push({ category: 'account_number', rawValue: m[0].trim(), start: m.index + m[0].indexOf('#'), end: m.index + m[0].length });
+    // rawValue must equal text.slice(start, end) — span starts at '#', so the
+    // raw value is the '#'-prefixed number, not the whole "account #..." match.
+    const start = m.index + m[0].indexOf('#');
+    const end = m.index + m[0].length;
+    raw.push({ category: 'account_number', rawValue: text.slice(start, end), start, end });
   }
   for (const m of text.matchAll(RE.accountWord)) {
     const val = m[1];
@@ -436,14 +582,17 @@ export function detect(text) {
 
   const matches = deduped.map((m) => {
     const meta = CATEGORY[m.category];
+    // Map spans back to the ORIGINAL (un-normalized) input so redaction and
+    // highlighting replace the right characters even around zero-width chars.
+    const span = toOrig ? toOrig(m.start, m.end) : m;
     return {
       type: meta.type,
       category: m.category,
       risk: meta.risk,
       rawValue: m.rawValue,
       maskedValue: maskFor(m.category, m.rawValue),
-      start: m.start,
-      end: m.end,
+      start: span.start,
+      end: span.end,
       showInModal: m.showInModal !== false,
     };
   });
