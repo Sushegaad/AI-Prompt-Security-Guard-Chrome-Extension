@@ -34,6 +34,29 @@ for (const site of SITES) {
   ok(`${site.id}: selectorVersion present`, Number.isInteger(site.selectorVersion));
 }
 
+/* --------------------------------------------- encoding guard (mojibake) --
+ * UTF-8 double-encoding once shipped to the live site ("â€”" instead of "—",
+ * broken checkmarks) after a byte-mode text edit. Every user-facing text file
+ * must decode as UTF-8 with no Latin-1-mojibake signature sequences. */
+{
+  const ROOT = join(DIR, '..', '..');
+  const GUARDED = [
+    'site/index.html', 'site/privacy.html', 'README.md', 'PRIVACY.md', 'CHANGELOG.md',
+    'src/shared/rules.json', 'docs/VPAT.md', 'docs/ACCESSIBILITY-AUDIT.md',
+    'docs/FEDERAL-SECURITY-OVERVIEW.md',
+  ];
+  // 'Â'/'â'/'Ã' followed by a continuation-range char = double-encoded UTF-8.
+  const MOJIBAKE = /[ÂâÃ][-¿Œ‘’“”†ˆ‰šƒ€…]/;
+  for (const rel of GUARDED) {
+    const p = join(ROOT, rel);
+    if (!existsSync(p)) continue;
+    const text = readFileSync(p, 'utf8');
+    const m = text.match(MOJIBAKE);
+    ok(`encoding: ${rel} free of mojibake`, !m);
+    if (m) console.log(`    first hit in ${rel}: ${JSON.stringify(m[0])}`);
+  }
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) {
   fails.forEach((f) => console.log('  ✗ ' + f));
