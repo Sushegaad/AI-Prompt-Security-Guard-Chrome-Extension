@@ -9,7 +9,7 @@ AI Safety Guard is built on a simple promise: **your prompts are scanned on your
 
 - Scanning for sensitive information happens **entirely in your browser**. Your prompt text never leaves your device.
 - The extension makes **no network calls at all**. It does **not** collect, log, sell, or transmit your prompts, the sites you visit, or any personal information.
-- The extension stores only **your settings and a single counter** ("risky sends caught") in your browser's local storage. This never includes prompt text.
+- The extension stores only **your settings and a few local counters** ("risky sends caught" and what you did after each warning — redacted, sent anyway, or kept editing) in your browser's local storage. This never includes prompt text.
 
 ## What the extension does
 
@@ -29,12 +29,13 @@ The extension uses your browser's local storage (`chrome.storage.local`) to reme
 - Detection categories you have muted
 - Whether onboarding is complete
 - `riskySubmissionsCaught` — a running count of how many times a warning was shown
+- `outcomes` — running counts of what you chose after a warning (redacted / sent anyway / kept editing), so the popup can show you your own stats. These are plain numbers with no prompt content attached
 
 This data lives only on your device. It is never uploaded to us. **Prompt text is never part of this stored data.** Uninstalling the extension removes all of it.
 
 ## Analytics and telemetry
 
-The extension collects **no analytics** and contains **no telemetry**. It makes no network calls, so nothing about you or your usage is sent anywhere. The only usage data is the local `riskySubmissionsCaught` count described above, which stays on your device and is shown in the popup.
+The extension collects **no analytics** and contains **no telemetry**. It makes no network calls, so nothing about you or your usage is sent anywhere. The only usage data is the local `riskySubmissionsCaught` and `outcomes` counts described above — a personal feedback loop shown in the popup that stays on your device and is never reported to us or anyone else.
 
 ## Permissions and why we need them
 

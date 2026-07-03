@@ -11,7 +11,7 @@
  * is no network call and nothing the user types ever leaves the browser.
  * ========================================================================== */
 
-import { detect, detectAsync, ASYNC_THRESHOLD } from './detector.js';
+import { detect, detectAsync, filterMatches, CATEGORY, ASYNC_THRESHOLD } from './detector.js';
 import { redact } from './redactor.js';
 import { readInput, writeInput } from './dom-utils.js';
 import { getAdapter } from './sites/index.js';
@@ -82,8 +82,13 @@ function siteEnabled() {
 }
 
 /* -------------------------------- scanning ------------------------------- */
+// Detection stays pure; user mutes ("don't warn again") are applied here.
+function withMutes(result) {
+  return filterMatches(result, settings.disabledCategories || []);
+}
+
 function applyResult(result) {
-  if (badge) badge.update(result, settings.sensitivity);
+  if (badge) badge.update(withMutes(result), settings.sensitivity);
 }
 
 function runScan() {
@@ -111,10 +116,13 @@ function evaluateSubmit(e) {
   if (consumeSuppression()) return; // user already chose to send
   const text = readInput(inputEl);
   if (!text) return;
-  const result = detect(text);
+  const result = withMutes(detect(text));
+  // A finding only interrupts if its category is interruptible (source_code is
+  // badge-only — code alone is context, not a leak) and the modal would have a
+  // row to show for it.
   const interrupts =
     shouldInterrupt(result.riskLevel, settings.sensitivity) &&
-    result.matches.some((m) => m.showInModal);
+    result.matches.some((m) => m.showInModal && CATEGORY[m.category].interrupt !== false);
   if (!interrupts) return;
 
   e.preventDefault();
@@ -150,6 +158,23 @@ function openModal(result, text) {
       onCatch: () => {
         try {
           chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
+        } catch {
+          /* ignore */
+        }
+      },
+      // What the user did after the warning — local counters only.
+      onOutcome: (action) => {
+        try {
+          chrome.runtime.sendMessage({ type: MSG.RECORD_OUTCOME, action });
+        } catch {
+          /* ignore */
+        }
+      },
+      // "Don't warn me about X" — the SW validates, persists, and broadcasts;
+      // our SETTINGS_UPDATED listener refreshes local state automatically.
+      mute: (category) => {
+        try {
+          chrome.runtime.sendMessage({ type: MSG.MUTE_CATEGORY, category });
         } catch {
           /* ignore */
         }
@@ -272,7 +297,7 @@ async function onAttach(files) {
       continue;
     }
     if (!text) continue;
-    const result = detect(text);
+    const result = withMutes(detect(text));
     const findings = result.matches.filter((m) => m.showInModal);
     if (findings.length && shouldInterrupt(result.riskLevel, settings.sensitivity)) {
       modal.openFile({

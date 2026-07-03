@@ -18,6 +18,17 @@ export function createModal(doc = document) {
   let card = null;
   let ctx = null; // { result, text, services }
   let prevFocus = null; // element focused before the modal opened
+  let outcomeSent = false; // one outcome per warning session
+
+  // Record what the user did with the warning, exactly once per open:
+  // 'redacted' | 'sentAnyway' | 'edited' (kept editing / dismissed).
+  function recordOutcome(action) {
+    if (outcomeSent) return;
+    outcomeSent = true;
+    if (ctx && ctx.services && typeof ctx.services.onOutcome === 'function') {
+      ctx.services.onOutcome(action);
+    }
+  }
 
   function mount() {
     prevFocus = doc.activeElement;
@@ -110,14 +121,25 @@ export function createModal(doc = document) {
     );
 
     const findings = h('div.asg-findings', { role: 'list' });
+    const canMute = ctx.services && typeof ctx.services.mute === 'function';
     for (const m of ctx.result.matches.filter((x) => x.showInModal)) {
-      findings.appendChild(
-        h('div.asg-find', { role: 'listitem' }, [
-          h('span.asg-find__type', { text: m.type }),
-          h('span.asg-find__val.asg-data', { text: m.maskedValue }),
-          h('span.asg-pill.asg-pill--' + riskClass(m.risk), { text: RISK[m.risk].pillLabel }),
-        ])
-      );
+      const row = h('div.asg-find', { role: 'listitem' }, [
+        h('span.asg-find__type', { text: m.type }),
+        h('span.asg-find__val.asg-data', { text: m.maskedValue }),
+        h('span.asg-pill.asg-pill--' + riskClass(m.risk), { text: RISK[m.risk].pillLabel }),
+      ]);
+      // "Don't warn again" — never offered for critical secrets (keys, SSNs,
+      // cards…); those warnings are the product's floor.
+      if (canMute && m.risk !== 'critical') {
+        row.appendChild(
+          h('button.asg-btn.asg-btn--link.asg-mute', {
+            text: 'Don’t warn about this',
+            'aria-label': `Don’t warn about ${m.type} again`,
+            onclick: () => handleMute(m.category),
+          })
+        );
+      }
+      findings.appendChild(row);
     }
     body.appendChild(findings);
 
@@ -131,6 +153,7 @@ export function createModal(doc = document) {
         h('button.asg-btn.asg-btn--link', {
           text: 'Send anyway',
           onclick: () => {
+            recordOutcome('sentAnyway');
             ctx.services.submit();
             close();
           },
@@ -140,6 +163,18 @@ export function createModal(doc = document) {
     ]);
     body.appendChild(actions);
     setBody(body);
+  }
+
+  /* --------------------------- mute a category --------------------------- */
+  function handleMute(category) {
+    ctx.services.mute(category); // SW persists + broadcasts; local UI updates now
+    ctx.result = {
+      ...ctx.result,
+      matches: ctx.result.matches.filter((m) => m.category !== category),
+    };
+    const remaining = ctx.result.matches.filter((m) => m.showInModal);
+    if (remaining.length) renderWarning();
+    else close(); // nothing left to warn about
   }
 
   /* ----------------------------- B1: redact ----------------------------- */
@@ -153,6 +188,7 @@ export function createModal(doc = document) {
         redactedText,
         isSafe,
         onLooksGood: () => {
+          recordOutcome('redacted');
           ctx.services.submit();
           close();
         },
@@ -209,6 +245,7 @@ export function createModal(doc = document) {
   /* ------------------------------- lifecycle ---------------------------- */
   function open(opts) {
     ctx = opts;
+    outcomeSent = false;
     if (!host) mount();
     if (ctx.services.onCatch) ctx.services.onCatch(ctx.result);
     renderWarning();
@@ -218,6 +255,8 @@ export function createModal(doc = document) {
   function close() {
     if (closing) return; // idempotent — guards double-fire (e.g. submit + scrim)
     closing = true;
+    // Any exit that isn't send-anyway/redact counts as "kept editing".
+    recordOutcome('edited');
     if (host) {
       doc.removeEventListener('keydown', onKey, true);
       host.remove();

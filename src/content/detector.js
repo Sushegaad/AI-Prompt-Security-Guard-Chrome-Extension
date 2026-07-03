@@ -55,7 +55,9 @@ export const CATEGORY = {
   email:          { type: 'Email address',    summary: 'email address',     redactLabel: '[EMAIL]',   risk: 'medium' },
   phone:          { type: 'Phone number',     summary: 'phone number',      redactLabel: '[PHONE]',   risk: 'medium' },
   address:        { type: 'Physical address', summary: 'physical address',  redactLabel: '[ADDRESS]', risk: 'medium' },
-  source_code:    { type: 'Source code',      summary: 'source code',       redactLabel: '[CODE]',    risk: 'medium' },
+  // interrupt:false — code alone is context, not a leak (secrets INSIDE code are
+  // caught by their own categories). Badge-only in every mode.
+  source_code:    { type: 'Source code',      summary: 'source code',       redactLabel: '[CODE]',    risk: 'medium', interrupt: false },
   gov_id:          { type: 'Government ID',        summary: 'government ID',         redactLabel: '[GOV_ID]',    risk: 'critical' },
   education:       { type: 'Education record',     summary: 'education record',      redactLabel: '[EDU]',       risk: 'high' },
   workplace:       { type: 'Workplace/HR data',    summary: 'workplace data',        redactLabel: '[HR]',        risk: 'high' },
@@ -303,7 +305,8 @@ const RE = {
   driversLicense: /\b(?:driver'?s?|driving|drivers)\s+licen[sc]e\b\s*(?:no\.?|number|#|:)?\s*([A-Z0-9]{5,18})\b/gi,
   nationalId: /\b(?:national\s+id(?:entity)?(?:\s+(?:card|number|no\.?))?|national\s+insurance(?:\s+number)?|nino|residence\s+permit|biometric\s+residence\s+permit|brp|sin|tax\s+id(?:entification)?(?:\s+number)?|tin)\b\s*(?:no\.?|number|#|:)?\s*([A-Z0-9][A-Z0-9-]{4,})\b/gi,
   // Labeled identifiers (alphanumeric, broader than the bare-# account rule).
-  labeledId: /\b(?:account|acct|customer|member|student|patient|case|ticket|reference|ref|order|policy|claim|invoice|employee|badge)\b\s*(?:id|no\.?|number|#)?\s*[:#]?\s*#?\s*([A-Za-z]*\d[A-Za-z0-9-]{3,})\b/gi,
+  // Group 1 = label (classified strong/weak below), group 2 = the identifier.
+  labeledId: /\b(account|acct|customer|member|student|patient|case|ticket|reference|ref|order|policy|claim|invoice|employee|badge)\b\s*(?:id|no\.?|number|#)?\s*[:#]?\s*#?\s*([A-Za-z]*\d[A-Za-z0-9-]{3,})\b/gi,
   gpsCoords: /[-+]?\d{1,2}\.\d{4,}\s*,\s*[-+]?\d{1,3}\.\d{4,}/g,
   winPath: /\b[A-Za-z]:\\(?:[^\\/:*?"<>|\r\n]+\\)+[^\\/:*?"<>|\r\n]+/g,
   uncPath: /\\\\[A-Za-z0-9._$-]+\\[^\s\\]+(?:\\[^\s\\]+)*/g,
@@ -400,6 +403,16 @@ function detectChildren(out, text) {
  * (ties: keep the longer span). Prevents the same characters being counted
  * as, e.g., both a phone number and a credit card.
  * ========================================================================== */
+/* Labeled-identifier classification (v1.1 FP retune). STRONG labels denote
+ * inherently personal records and always fire. WEAK labels ("order #12345")
+ * are everyday commerce noise — they only fire when another personal
+ * identifier appears in the same text, or the ID itself looks like a real
+ * account token (≥ 8 chars, mixed letters+digits). */
+const WEAK_ID_LABELS = new Set(['order', 'ticket', 'invoice', 'reference', 'ref', 'case', 'badge']);
+function weakIdQualifies(value) {
+  return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
+}
+
 function deOverlap(matches) {
   const sorted = [...matches].sort((a, b) => a.start - b.start || b.end - a.end);
   const kept = [];
@@ -496,12 +509,19 @@ export function detect(input) {
   }
 
   // --- High: account, health, financial, legal, internal urls ---
+  // Weak-label candidates are held back until we know whether the text also
+  // contains a real personal identifier (resolved below, after email/phone).
+  const weakIds = [];
   for (const m of text.matchAll(RE.account)) {
     // rawValue must equal text.slice(start, end) — span starts at '#', so the
     // raw value is the '#'-prefixed number, not the whole "account #..." match.
     const start = m.index + m[0].indexOf('#');
     const end = m.index + m[0].length;
-    raw.push({ category: 'account_number', rawValue: text.slice(start, end), start, end });
+    const entry = { category: 'account_number', rawValue: text.slice(start, end), start, end };
+    // A bare "#12345" with no account/acct label is weak (order numbers, GitHub
+    // issues, receipts) — corroboration required.
+    if (/\b(?:account|acct|a\/c)\b/i.test(m[0])) raw.push(entry);
+    else weakIds.push(entry);
   }
   for (const m of text.matchAll(RE.accountWord)) {
     const val = m[1];
@@ -510,9 +530,12 @@ export function detect(input) {
   }
   // Broader labeled identifiers (alphanumeric customer/member/student/case IDs).
   for (const m of text.matchAll(RE.labeledId)) {
-    const val = m[1];
+    const label = m[1].toLowerCase();
+    const val = m[2];
     const start = m.index + m[0].lastIndexOf(val);
-    raw.push({ category: 'account_number', rawValue: val, start, end: start + val.length });
+    const entry = { category: 'account_number', rawValue: val, start, end: start + val.length };
+    if (!WEAK_ID_LABELS.has(label) || weakIdQualifies(val)) raw.push(entry);
+    else weakIds.push(entry);
   }
   detectKeywords(raw, text, RULES.healthKeywords, 'health');
   const finHits = detectKeywords(raw, text, RULES.financialKeywords, 'financial');
@@ -563,6 +586,9 @@ export function detect(input) {
   const hasIdentifier = raw.some((r) =>
     ['email', 'account_number', 'credit_card', 'ssn', 'phone'].includes(r.category)
   );
+  // Weak labeled IDs ("order #12345") fire only alongside a real identifier —
+  // "order #12345 shipped" stays safe; "order #12345 for jane@x.com" flags.
+  if (weakIds.length && hasIdentifier) raw.push(...weakIds);
   const hasTicket = /\bticket\s*#?\s*\d{3,}\b/i.test(text) || /\bcustomer\b/i.test(text);
   if (hasIdentifier || hasTicket) {
     const STOP = new Set(['Dear', 'Hi', 'Hello', 'Best', 'Regards', 'Thanks', 'Thank', 'The', 'This', 'From', 'To']);
@@ -616,6 +642,29 @@ export function detect(input) {
  * Async wrapper for very large pastes (> ASYNC_THRESHOLD chars): yields to the
  * event loop once so the UI thread isn't blocked, then runs the same pure scan.
  */
+/**
+ * Remove muted categories from a detect() result and recompute the aggregate
+ * fields. Pure — detection itself stays mode/mute-agnostic; muting is applied
+ * by the orchestrator after the scan (mirrors how shouldInterrupt is applied).
+ * @param {ReturnType<typeof detect>} result
+ * @param {string[]} mutedCategories
+ */
+export function filterMatches(result, mutedCategories) {
+  if (!mutedCategories || mutedCategories.length === 0) return result;
+  const muted = new Set(mutedCategories);
+  const matches = result.matches.filter((m) => !muted.has(m.category));
+  if (matches.length === result.matches.length) return result;
+  const categories = [...new Set(matches.map((m) => m.category))];
+  const riskLevel = highestRisk(matches.map((m) => m.risk));
+  const seen = new Set();
+  const summary = matches
+    .filter((m) => m.showInModal)
+    .filter((m) => (seen.has(m.category) ? false : (seen.add(m.category), true)))
+    .map((m) => CATEGORY[m.category].summary)
+    .join(', ');
+  return { ...result, matches, categories, riskLevel, summary };
+}
+
 export const ASYNC_THRESHOLD = 10000;
 export function detectAsync(text) {
   if (typeof text === 'string' && text.length > ASYNC_THRESHOLD) {

@@ -7,6 +7,7 @@
 
 import { MSG, withDefaults } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
+import { CATEGORY } from '../content/detector.js';
 import { SITES } from '../shared/sites.js';
 import { logoDataUri } from '../shared/logo.js';
 import { h as el } from '../shared/h.js';
@@ -125,11 +126,44 @@ export function initPopup(opts = {}) {
       ])
     );
 
-    // --- Stat ---
+    // --- Muted categories ("don't warn again") with an unmute control ------
+    const muted = (settings.disabledCategories || []).filter((c) => CATEGORY[c]);
+    if (muted.length) {
+      body.appendChild(
+        el('div.section', {}, [
+          el('p.section__label', { text: 'Muted warnings' }),
+          ...muted.map((c) =>
+            el('label.toggle-row', {}, [
+              el('span.toggle-row__label', { text: CATEGORY[c].type }),
+              el('button.asg-btn.asg-btn--secondary', {
+                type: 'button',
+                'data-unmute': c,
+                text: 'Unmute',
+                'aria-label': `Unmute ${CATEGORY[c].type} warnings`,
+                onclick: () =>
+                  persist({
+                    disabledCategories: (settings.disabledCategories || []).filter((x) => x !== c),
+                  }),
+              }),
+            ])
+          ),
+        ])
+      );
+    }
+
+    // --- Stat (all local — never uploaded) ---
+    const outcomes = settings.outcomes || {};
     body.appendChild(
       el('div.stat', {}, [
         el('span.stat__num', { text: String(settings.riskySubmissionsCaught || 0) }),
         el('span.stat__caption', { text: ' risky sends caught' }),
+        ...(outcomes.redacted || outcomes.sentAnyway
+          ? [
+              el('span.stat__split', {
+                text: ` · ${outcomes.redacted || 0} redacted · ${outcomes.sentAnyway || 0} sent anyway`,
+              }),
+            ]
+          : []),
       ])
     );
   }

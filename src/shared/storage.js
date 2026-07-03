@@ -18,11 +18,24 @@ export const DEFAULT_SETTINGS = Object.freeze({
   sensitivity: DEFAULT_SENSITIVITY, // "balanced"
   enabledSites: defaultEnabledSites(), // all supported sites on, from the registry
   customDomains: [],
-  disabledCategories: [],
+  disabledCategories: [], // user-muted detection categories ("don't warn again")
   scanAttachments: true, // scan attached PDF/DOCX files for PII
   onboardingComplete: false,
-  riskySubmissionsCaught: 0, // lifetime counter shown in popup
+  riskySubmissionsCaught: 0, // lifetime "caught" counter shown in popup
+  // Outcome split for the caught counter — what the user did after a warning.
+  // All local, never uploaded (see PRIVACY.md).
+  outcomes: Object.freeze({ redacted: 0, sentAnyway: 0, edited: 0 }),
 });
+
+/**
+ * Categories that can never be muted: critical secrets where a single miss is
+ * catastrophic. Keep in sync with the risk:'critical' entries in detector.js
+ * CATEGORY (listed here so the service worker doesn't import the engine).
+ */
+export const UNMUTABLE_CATEGORIES = Object.freeze([
+  'api_key', 'password', 'connection_string', 'private_key', 'iban',
+  'credit_card', 'ssn', 'gov_id',
+]);
 
 /** Message types exchanged with the service worker. */
 export const MSG = Object.freeze({
@@ -30,8 +43,12 @@ export const MSG = Object.freeze({
   SET_SETTINGS: 'SET_SETTINGS',
   SETTINGS_UPDATED: 'SETTINGS_UPDATED',
   RECORD_CATCH: 'RECORD_CATCH',
+  RECORD_OUTCOME: 'RECORD_OUTCOME', // { action: 'redacted'|'sentAnyway'|'edited' }
+  MUTE_CATEGORY: 'MUTE_CATEGORY', // { category } — adds to disabledCategories
   EXTRACT_PDF: 'EXTRACT_PDF', // content -> SW -> offscreen: parse a PDF locally
 });
+
+export const OUTCOME_ACTIONS = Object.freeze(['redacted', 'sentAnyway', 'edited']);
 
 /** Deep-ish merge of stored values over defaults (enabledSites merged by key). */
 export function withDefaults(stored = {}) {
@@ -39,6 +56,7 @@ export function withDefaults(stored = {}) {
     ...DEFAULT_SETTINGS,
     ...stored,
     enabledSites: { ...DEFAULT_SETTINGS.enabledSites, ...(stored.enabledSites || {}) },
+    outcomes: { ...DEFAULT_SETTINGS.outcomes, ...(stored.outcomes || {}) },
   };
 }
 
@@ -73,6 +91,8 @@ export function sanitizePatch(patch = {}) {
   if (has('disabledCategories') && Array.isArray(patch.disabledCategories)) {
     out.disabledCategories = patch.disabledCategories
       .filter((c) => typeof c === 'string')
+      // Critical secret categories can never be muted, whatever the caller says.
+      .filter((c) => !UNMUTABLE_CATEGORIES.includes(c))
       .slice(0, 50);
   }
   if (has('scanAttachments')) out.scanAttachments = !!patch.scanAttachments;
@@ -104,4 +124,35 @@ export async function bumpCatch(area) {
   const next = (riskySubmissionsCaught || 0) + 1;
   await storage.set({ riskySubmissionsCaught: next });
   return next;
+}
+
+/**
+ * Record what the user did after a warning (local feedback loop only — if
+ * "sent anyway" dominates, the thresholds are wrong). Returns new outcomes.
+ */
+export async function bumpOutcome(action, area) {
+  const storage = area || chrome.storage.local;
+  if (!OUTCOME_ACTIONS.includes(action)) return null;
+  const { outcomes } = await storage.get({ outcomes: DEFAULT_SETTINGS.outcomes });
+  const next = { ...DEFAULT_SETTINGS.outcomes, ...(outcomes || {}) };
+  next[action] = (next[action] || 0) + 1;
+  await storage.set({ outcomes: next });
+  return next;
+}
+
+/**
+ * Add a category to disabledCategories ("don't warn again"). Rejects
+ * unmutable (critical-secret) categories. Returns the fresh settings.
+ */
+export async function muteCategory(category, area) {
+  const storage = area || chrome.storage.local;
+  if (typeof category !== 'string' || UNMUTABLE_CATEGORIES.includes(category)) {
+    return readSettings(storage);
+  }
+  const { disabledCategories } = await storage.get({ disabledCategories: [] });
+  const list = Array.isArray(disabledCategories) ? disabledCategories : [];
+  if (!list.includes(category)) {
+    await storage.set({ disabledCategories: [...list, category].slice(0, 50) });
+  }
+  return readSettings(storage);
 }

@@ -8,7 +8,7 @@
  * settings in memory; every handler reads from chrome.storage fresh.
  * ========================================================================== */
 
-import { MSG, readSettings, writeSettings, bumpCatch } from '../shared/storage.js';
+import { MSG, readSettings, writeSettings, bumpCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
 
 /* --- First run: open onboarding ------------------------------------------ */
 chrome.runtime.onInstalled.addListener((details) => {
@@ -102,6 +102,17 @@ export async function routeMessage(msg, deps = {}) {
     case MSG.RECORD_CATCH: {
       const riskySubmissionsCaught = await bump();
       return { riskySubmissionsCaught };
+    }
+    case MSG.RECORD_OUTCOME: {
+      const bumpOut = deps.bumpOutcome || bumpOutcome;
+      const outcomes = await bumpOut(msg.action);
+      return outcomes ? { outcomes } : { ok: false, error: 'invalid_action' };
+    }
+    case MSG.MUTE_CATEGORY: {
+      const mute = deps.muteCategory || muteCategory;
+      const settings = await mute(msg.category);
+      await broadcast(settings);
+      return settings;
     }
     case MSG.EXTRACT_PDF: {
       const extract = deps.extractPdf || extractPdfViaOffscreen;

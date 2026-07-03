@@ -129,8 +129,11 @@ export const SENSITIVITY = Object.freeze({
   balanced: Object.freeze({
     id: 'balanced',
     label: 'Balanced',
-    description: 'Warn on personal, business & sensitive data',
-    interruptsOn: Object.freeze(['medium', 'high', 'critical']),
+    description: 'Interrupt on business, customer & sensitive data; badge-only for emails, phones & code',
+    // v1.1 retune: medium findings (emails, phones, code) turn the badge amber
+    // but no longer interrupt — warning fatigue kills DLP tools. High+critical
+    // still open the modal.
+    interruptsOn: Object.freeze(['high', 'critical']),
     badgeAlwaysVisible: false,
     recommended: true,   // ★ default — marked RECOMMENDED in onboarding
   }),
