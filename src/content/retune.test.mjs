@@ -30,8 +30,11 @@ const {
   sanitizePatch,
   bumpOutcome,
   muteCategory,
+  recordCatch,
+  shouldShowNoiseHint,
   UNMUTABLE_CATEGORIES,
   OUTCOME_ACTIONS,
+  RECENT_CATCHES_MAX,
 } = await import('../shared/storage.js');
 
 let pass = 0;
@@ -209,6 +212,50 @@ ok('withDefaults merges outcomes by key', withDefaults({ outcomes: { redacted: 3
   open();
   modal.close();
   ok('outcome: dismiss -> edited', JSON.stringify(outcomes) === JSON.stringify(['edited']));
+}
+
+/* -------------------------------------- feedback loop (noise hint) ------- */
+ok('hint: silent below sample size', !shouldShowNoiseHint(withDefaults({ outcomes: { redacted: 1, sentAnyway: 10, edited: 2 } })));
+ok('hint: fires when sentAnyway dominates 20+', shouldShowNoiseHint(withDefaults({ outcomes: { redacted: 3, sentAnyway: 15, edited: 2 } })));
+ok('hint: silent when redaction dominates', !shouldShowNoiseHint(withDefaults({ outcomes: { redacted: 18, sentAnyway: 4, edited: 2 } })));
+ok('hint: respects dismissal', !shouldShowNoiseHint(withDefaults({ noiseHintDismissed: true, outcomes: { redacted: 0, sentAnyway: 25, edited: 0 } })));
+ok('hint: exact 60% does not fire (strictly greater)', !shouldShowNoiseHint(withDefaults({ outcomes: { redacted: 8, sentAnyway: 12, edited: 0 } })));
+{
+  const dirty = sanitizePatch({ noiseHintDismissed: 'yes', catchHistory: 1 });
+  ok('sanitize: hint/history flags coerced to bool', dirty.noiseHintDismissed === true && dirty.catchHistory === true);
+}
+
+/* -------------------------------------- catch history (local, masked) ---- */
+{
+  const area = makeStorageArea();
+  // History off (default): counter bumps, nothing stored.
+  const r1 = await recordCatch([{ category: 'email', masked: 'a@…' }], area);
+  ok('history: counter bumps with history off', r1.riskySubmissionsCaught === 1);
+  ok('history: nothing stored when off', !(area._data.recentCatches || []).length);
+
+  // History on: masked entries stored, newest first, validated.
+  await area.set({ catchHistory: true });
+  await recordCatch([{ category: 'email', masked: 'sarah.chen@…' }, { category: 'api_key', masked: 'sk-live-••••' }], area);
+  await recordCatch([{ category: 'ssn', masked: '•••-••-6789' }], area);
+  const list = area._data.recentCatches;
+  ok('history: entries stored newest-first', list.length === 2 && list[0].items[0].category === 'ssn');
+  ok('history: masked values only, as given', list[1].items[1].masked === 'sk-live-••••');
+  ok('history: entries carry timestamps', typeof list[0].t === 'number' && list[0].t > 0);
+
+  // Defensive validation: junk findings dropped, lengths capped.
+  await recordCatch([{ category: 42, masked: 'x' }, { category: 'phone', masked: 'y'.repeat(100) }, 'junk'], area);
+  const top = area._data.recentCatches[0];
+  ok('history: junk items dropped, strings capped', top.items.length === 1 && top.items[0].masked.length === 40);
+
+  // Cap at RECENT_CATCHES_MAX.
+  for (let i = 0; i < 30; i++) await recordCatch([{ category: 'email', masked: `e${i}@…` }], area);
+  ok('history: capped at max', area._data.recentCatches.length === RECENT_CATCHES_MAX);
+
+  // Callers can only CLEAR the list, never inject entries.
+  const inject = sanitizePatch({ recentCatches: [{ t: 1, items: [{ category: 'email', masked: 'evil' }] }] });
+  ok('sanitize: history injection rejected', !('recentCatches' in inject));
+  const clear = sanitizePatch({ recentCatches: [] });
+  ok('sanitize: history clear allowed', Array.isArray(clear.recentCatches) && clear.recentCatches.length === 0);
 }
 
 /* ----------------------------------------------------------------- report */

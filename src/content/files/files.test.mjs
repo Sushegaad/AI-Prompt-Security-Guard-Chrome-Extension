@@ -18,7 +18,7 @@ globalThis.chrome = { runtime: { getURL: (p) => 'chrome-extension://test/' + p }
 const { extractDocxText } = await import('./docx.js');
 const { extractFromDoc } = await import('./pdf.js');
 const { fileKind, extractText } = await import('./extract.js');
-const { initAttachWatcher } = await import('./attach.js');
+const { initAttachWatcher, isImageFile } = await import('./attach.js');
 const { detect } = await import('../detector.js');
 const { createModal } = await import('../ui/modal.js');
 const { bytesToBase64, base64ToBytes } = await import('../../shared/base64.js');
@@ -145,6 +145,25 @@ function makeDocx() {
   Object.defineProperty(input, 'files', { value: [{ name: 'b.docx' }], configurable: true });
   input.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
   ok('attach: file input change fires onAttach', got && got[0].name === 'b.docx');
+
+  // clipboard paste carrying an image (the screenshot path)
+  got = null;
+  const pasteEv = new dom.window.Event('paste', { bubbles: true });
+  pasteEv.clipboardData = { files: [{ name: 'image.png', type: 'image/png' }] };
+  document.dispatchEvent(pasteEv);
+  ok('attach: image paste fires onAttach', got && got[0].type === 'image/png');
+
+  // plain-text paste (empty file list) must NOT fire
+  got = null;
+  const textPaste = new dom.window.Event('paste', { bubbles: true });
+  textPaste.clipboardData = { files: [], getData: () => 'just text' };
+  document.dispatchEvent(textPaste);
+  ok('attach: text paste does not fire', got === null);
+
+  // isImageFile classification
+  ok('attach: isImageFile true for png', isImageFile({ type: 'image/png' }));
+  ok('attach: isImageFile false for pdf', !isImageFile({ type: 'application/pdf' }));
+  ok('attach: isImageFile safe on missing type', !isImageFile({}) && !isImageFile(null));
 
   // disabled -> no fire (fresh document so no other watcher is attached)
   const dom2 = new JSDOM('<!DOCTYPE html><html><body></body></html>');

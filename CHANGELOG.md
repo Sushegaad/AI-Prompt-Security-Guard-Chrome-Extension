@@ -5,6 +5,27 @@ store reviewers can see exactly what changed and why.
 
 ## Unreleased — ships with the Chrome Web Store submission
 
+### EU / multilingual detection
+- French, German and Spanish keyword packs across health, workplace,
+  special-category, legal, restriction, financial, education and children lists.
+- Checksum-validated EU identifiers: French NIR (mod-97 key), German Steuer-ID
+  (ISO 7064, keyword-anchored), Spanish DNI (control letter) — all `gov_id`,
+  critical. New suite: `detector.i18n.test.mjs` (53 assertions).
+
+### Screenshots & images
+- Pasted or attached images now trigger a tailored nudge (screenshots often
+  carry secrets no text scanner can read). New capture-phase paste listener;
+  no OCR, no image content is read.
+
+### Feedback loop
+- One-time popup hint when "sent anyway" exceeds 60% of 20+ outcomes.
+- Optional local catch history (off by default): last 20 warnings, masked
+  values only, clearable, documented in PRIVACY.md.
+
+### CI
+- Tier A e2e now also runs on every push to main (was PR/schedule only).
+- New `docs/VERIFICATION-CHECKLIST.md` for the pre-submission browser pass.
+
 ### Detection
 - Fixed systematic misses: hex-only API keys (charset-relative entropy), PEM
   private keys, JWTs, credential-bearing webhook URLs, dash-less/spaced SSNs

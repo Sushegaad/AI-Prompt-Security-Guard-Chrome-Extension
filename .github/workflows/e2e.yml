@@ -7,6 +7,8 @@
 name: e2e
 
 on:
+  push:
+    branches: [main] # Tier A runs on every push, so the harness is never unverified
   pull_request:
   workflow_dispatch:
   schedule:

@@ -8,7 +8,7 @@
  * settings in memory; every handler reads from chrome.storage fresh.
  * ========================================================================== */
 
-import { MSG, readSettings, writeSettings, bumpCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
+import { MSG, readSettings, writeSettings, recordCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
 import { scriptIdFor, originFor } from '../shared/domains.js';
 
 /* --- First run: open onboarding ------------------------------------------ */
@@ -167,7 +167,6 @@ async function extractPdfViaOffscreen(dataB64) {
 export async function routeMessage(msg, deps = {}) {
   const read = deps.readSettings || readSettings;
   const write = deps.writeSettings || writeSettings;
-  const bump = deps.bumpCatch || bumpCatch;
   const broadcast = deps.broadcast || broadcastSettings;
 
   switch (msg && msg.type) {
@@ -188,8 +187,10 @@ export async function routeMessage(msg, deps = {}) {
       return settings;
     }
     case MSG.RECORD_CATCH: {
-      const riskySubmissionsCaught = await bump();
-      return { riskySubmissionsCaught };
+      // Bumps the counter; also stores a masked-only history entry when the
+      // user has opted into catch history (storage.recordCatch validates).
+      const rec = deps.recordCatch || recordCatch;
+      return rec(msg.findings);
     }
     case MSG.RECORD_OUTCOME: {
       const bumpOut = deps.bumpOutcome || bumpOutcome;

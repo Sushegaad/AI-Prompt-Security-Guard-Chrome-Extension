@@ -19,7 +19,7 @@ import { looksLikeSendButton } from './sites/adapter-base.js';
 import { createBadge } from './ui/badge.js';
 import { createModal } from './ui/modal.js';
 import { loadFonts } from './ui/fonts.js';
-import { initAttachWatcher } from './files/attach.js';
+import { initAttachWatcher, isImageFile } from './files/attach.js';
 import { extractText } from './files/extract.js';
 import { bytesToBase64 } from '../shared/base64.js';
 import { log } from '../shared/log.js';
@@ -160,9 +160,13 @@ function openModal(result, text) {
         // box. Re-scan once the site has had a moment to clear.
         setTimeout(runScan, 800);
       },
-      onCatch: () => {
+      onCatch: (res) => {
         try {
-          chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
+          // Masked values only — raw secrets never leave the page context.
+          const findings = (res && res.matches ? res.matches : [])
+            .filter((m) => m.showInModal)
+            .map((m) => ({ category: m.category, masked: m.maskedValue }));
+          chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH, findings });
         } catch {
           /* ignore */
         }
@@ -284,13 +288,19 @@ async function getFileText(file) {
 async function onAttach(files) {
   const first = files.find((f) => f && f.name);
   const count = files.length;
-  // Tier 0: immediate, non-blocking nudge.
+  const allImages = files.every(isImageFile);
+  // Tier 0: immediate, non-blocking nudge. Screenshots get their own copy —
+  // this scanner can't read pixels, and images are the most common way a
+  // stack trace or customer record slips into an AI chat unchecked.
   modal.openFile({
-    title: 'Check this file before sending',
-    subtitle:
-      `You're attaching ${count > 1 ? count + ' files' : 'a file'}` +
-      (first ? ` ("${first.name}")` : '') +
-      `. Files can carry personal data this scanner can't see in the chat box. Review before sending.`,
+    title: allImages ? 'Check this image before sending' : 'Check this file before sending',
+    subtitle: allImages
+      ? `You're attaching ${count > 1 ? count + ' images' : 'an image'}. Screenshots often ` +
+        `contain names, keys, account numbers or other private data this scanner can't read. ` +
+        `Take a second look before sending.`
+      : `You're attaching ${count > 1 ? count + ' files' : 'a file'}` +
+        (first ? ` ("${first.name}")` : '') +
+        `. Files can carry personal data this scanner can't see in the chat box. Review before sending.`,
   });
 
   // Tier 1: extract text on-device and scan it. Escalate if PII is found.
@@ -311,7 +321,10 @@ async function onAttach(files) {
         findings: result.matches,
       });
       try {
-        chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
+        chrome.runtime.sendMessage({
+          type: MSG.RECORD_CATCH,
+          findings: findings.map((m) => ({ category: m.category, masked: m.maskedValue })),
+        });
       } catch {
         /* ignore */
       }

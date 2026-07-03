@@ -75,6 +75,40 @@ body.asg-root {
   color: var(--color-muted);
 }
 
+/* noise hint (shown once when "sent anyway" dominates outcomes) */
+.hint {
+  background: var(--color-trust-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+.hint__text {
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  line-height: var(--line-normal);
+  margin: 0 0 var(--space-2);
+}
+
+/* recent catches (local-only, masked) */
+.catch-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.catch-row__time {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.catch-row__items {
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
 /* segmented control */
 .segmented {
   display: flex;

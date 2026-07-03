@@ -39,7 +39,7 @@ globalThis.chrome = {
   },
 };
 
-const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, sanitizePatch } =
+const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, recordCatch, sanitizePatch } =
   await import('../shared/storage.js');
 const { routeMessage } = await import('./service-worker.js');
 
@@ -73,7 +73,7 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   const deps = {
     readSettings: () => readSettings(area),
     writeSettings: (p) => writeSettings(p, area),
-    bumpCatch: () => bumpCatch(area),
+    recordCatch: (f) => recordCatch(f, area),
     broadcast: () => (deps._broadcasts = (deps._broadcasts || 0) + 1),
   };
   const got = await routeMessage({ type: MSG.GET_SETTINGS }, deps);

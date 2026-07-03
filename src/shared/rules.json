@@ -1,5 +1,5 @@
 {
-  "_comment": "AI Safety Guard — detection keyword & prefix data. Regex patterns live in detector.js; this file holds the editable word lists and token prefixes. Keep entries lowercase unless case is significant (API key prefixes are case-sensitive).",
+  "_comment": "AI Safety Guard — detection keyword & prefix data. Regex patterns live in detector.js; this file holds the editable word lists and token prefixes. Keep entries lowercase unless case is significant (API key prefixes are case-sensitive). Lists include French/German/Spanish phrases (EU coverage) — new entries in any language must be distinctive multi-word phrases or unambiguous single words, never short generic terms.",
 
   "apiKeyPrefixes": [
     "sk-live-", "sk-test-", "sk-proj-", "sk-", "pk-live-", "pk-test-", "rk-live-",
@@ -17,13 +17,19 @@
   "healthKeywords": [
     "patient", "diagnosis", "diagnosed", "prescription", "prescribed",
     "icd-9", "icd-10", "icd9", "icd10", "mrn", "date of birth", "dob",
-    "medical record", "blood pressure", "symptom", "treatment plan", "dosage"
+    "medical record", "blood pressure", "symptom", "treatment plan", "dosage",
+    "dossier médical", "ordonnance médicale", "arrêt maladie", "diagnostic médical",
+    "krankenakte", "patientenakte", "ärztliche diagnose", "krankschreibung",
+    "historial médico", "receta médica", "baja médica", "diagnóstico de"
   ],
 
   "financialKeywords": [
     "invoice", "revenue", "ebitda", "bank account", "routing number", "routing #",
     "account balance", "wire transfer", "iban", "swift code", "gross margin",
-    "net income", "accounts payable", "accounts receivable", "p&l", "profit and loss"
+    "net income", "accounts payable", "accounts receivable", "p&l", "profit and loss",
+    "virement bancaire", "relevé bancaire", "relevé d'identité bancaire",
+    "kontoauszug", "bankverbindung", "überweisung an",
+    "transferencia bancaria", "extracto bancario", "cuenta bancaria"
   ],
 
   "legalKeywords": [
@@ -37,7 +43,10 @@
     "settlement offer", "settlement agreement", "settlement terms",
     "settlement amount", "terms of settlement", "non-disclosure agreement",
     "letter of intent", "cease and desist", "power of attorney",
-    "master service agreement", "statement of work", "breach of contract"
+    "master service agreement", "statement of work", "breach of contract",
+    "accord de confidentialité", "mise en demeure", "protocole d'accord",
+    "vertraulichkeitsvereinbarung", "geheimhaltungsvereinbarung", "abfindungsvereinbarung",
+    "acuerdo de confidencialidad", "poder notarial", "acuerdo de conciliación"
   ],
 
   "sourceCodeKeywords": [
@@ -58,7 +67,10 @@
   "educationKeywords": [
     "student id", "gpa", "grade point average", "transcript", "report card",
     "class rank", "disciplinary record", "504 plan", "ferpa", "enrollment record",
-    "academic standing", "detention record"
+    "academic standing", "detention record",
+    "bulletin scolaire", "dossier scolaire",
+    "schulzeugnis", "notendurchschnitt",
+    "boletín de notas", "expediente académico"
   ],
 
   "workplaceKeywords": [
@@ -66,14 +78,21 @@
     "written warning", "probation period", "misconduct", "severance", "layoff",
     "laid off", "headcount reduction", "salary is", "annual salary",
     "base salary", "salary of", "compensation package",
-    "termination plan", "being let go"
+    "termination plan", "being let go",
+    "fiche de paie", "bulletin de salaire", "salaire de", "salaire annuel", "lettre de licenciement",
+    "gehaltsabrechnung", "personalakte", "abmahnung", "kündigungsschreiben", "gehalt von", "jahresgehalt",
+    "nómina de", "hoja de nómina", "carta de despido", "sueldo de", "salario anual", "expediente laboral"
   ],
 
   "specialCategoryKeywords": [
     "ethnic origin", "racial origin", "religious belief", "political opinion",
     "political affiliation", "trade union member", "union representative",
     "union membership", "sexual orientation", "gender identity", "biometric data",
-    "genetic data", "immigration status", "disability status"
+    "genetic data", "immigration status", "disability status",
+    "origine ethnique", "opinion politique", "orientation sexuelle", "appartenance syndicale", "données biométriques",
+    "ethnische herkunft", "politische meinung", "sexuelle orientierung", "gewerkschaftsmitglied",
+    "betriebsratsmitglied", "religionszugehörigkeit", "schwerbehindert",
+    "origen étnico", "opinión política", "orientación sexual", "afiliación sindical", "datos biométricos"
   ],
 
   "regulatedKeywords": [
@@ -86,7 +105,10 @@
     "strictly confidential", "privileged and confidential",
     "do not share", "do not disclose", "do not forward", "not for distribution",
     "not for third-party", "third-party processing", "internal use only",
-    "for internal use only", "not for external", "do not send to ai", "need-to-know"
+    "for internal use only", "not for external", "do not send to ai", "need-to-know",
+    "strictement confidentiel", "ne pas diffuser", "usage interne uniquement",
+    "streng vertraulich", "nur für den internen gebrauch", "nicht weiterleiten",
+    "estrictamente confidencial", "no divulgar", "solo para uso interno"
   ],
 
   "companySecretKeywords": [
@@ -98,7 +120,10 @@
 
   "childrenKeywords": [
     "safeguarding", "child protection", "custody arrangement", "custody",
-    "foster care", "minor child", "underage", "cyberbullying"
+    "foster care", "minor child", "underage", "cyberbullying",
+    "garde des enfants", "protection de l'enfance",
+    "sorgerecht", "jugendamt", "kindeswohl",
+    "custodia de los hijos", "protección de menores"
   ],
 
   "locationKeywords": [

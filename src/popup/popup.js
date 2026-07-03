@@ -5,7 +5,7 @@
  * persists every change immediately (no Save button) via SET_SETTINGS.
  * ========================================================================== */
 
-import { MSG, withDefaults } from '../shared/storage.js';
+import { MSG, withDefaults, shouldShowNoiseHint } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
 import { CATEGORY } from '../content/detector.js';
 import { normalizeHostname, originFor } from '../shared/domains.js';
@@ -188,6 +188,70 @@ export function initPopup(opts = {}) {
         ])
       );
     }
+
+    // --- Noise hint: the outcome counters, actually consumed --------------
+    if (shouldShowNoiseHint(settings)) {
+      body.appendChild(
+        el('div.hint', { role: 'status' }, [
+          el('p.hint__text', {
+            text:
+              'You send most warnings anyway. If they feel noisy, try Basic mode, ' +
+              'or mute the categories you don’t care about from the warning itself.',
+          }),
+          el('button.asg-btn.asg-btn--link', {
+            type: 'button',
+            'data-hint-dismiss': '1',
+            text: 'Got it',
+            onclick: () => persist({ noiseHintDismissed: true }),
+          }),
+        ])
+      );
+    }
+
+    // --- Recent catches (optional, local-only, masked values) -------------
+    body.appendChild(
+      el('div.section', {}, [
+        el('p.section__label', { text: 'Catch history' }),
+        el('label.toggle-row', {}, [
+          el('span.toggle-row__label', { text: 'Keep a local history of catches' }),
+          el('input.switch', {
+            type: 'checkbox',
+            'data-setting': 'catchHistory',
+            checked: settings.catchHistory === true,
+            onchange: (e) => persist({ catchHistory: e.target.checked }),
+          }),
+        ]),
+        ...(settings.catchHistory && (settings.recentCatches || []).length
+          ? [
+              ...(settings.recentCatches || []).slice(0, 20).map((c) =>
+                el('div.catch-row', {}, [
+                  el('span.catch-row__time', {
+                    text: new Date(c.t).toLocaleString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                  }),
+                  el('span.catch-row__items.asg-data', {
+                    text: (c.items || [])
+                      .map((i) => `${CATEGORY[i.category] ? CATEGORY[i.category].type : i.category} ${i.masked}`)
+                      .join(' · '),
+                  }),
+                ])
+              ),
+              el('button.asg-btn.asg-btn--secondary', {
+                type: 'button',
+                'data-clear-history': '1',
+                text: 'Clear history',
+                onclick: () => persist({ recentCatches: [] }),
+              }),
+            ]
+          : settings.catchHistory
+            ? [el('p.section__hint', { text: 'Nothing recorded yet — catches will appear here, masked.' })]
+            : [el('p.section__hint', { text: 'Off by default. Stored on this device only, masked values only.' })]),
+      ])
+    );
 
     // --- Stat (all local — never uploaded) ---
     const outcomes = settings.outcomes || {};

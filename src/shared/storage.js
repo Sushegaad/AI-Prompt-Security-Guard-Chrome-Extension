@@ -26,7 +26,29 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // Outcome split for the caught counter — what the user did after a warning.
   // All local, never uploaded (see PRIVACY.md).
   outcomes: Object.freeze({ redacted: 0, sentAnyway: 0, edited: 0 }),
+  // Optional, off by default: a local-only list of recent catches shown in the
+  // popup ({ t, items: [{ category, masked }] }). MASKED values only — the raw
+  // secret never reaches storage. Capped at RECENT_CATCHES_MAX, clearable.
+  catchHistory: false,
+  recentCatches: [],
+  // One-time popup hint when "sent anyway" dominates outcomes (self-tuning
+  // nudge, see shouldShowNoiseHint). Set true once dismissed.
+  noiseHintDismissed: false,
 });
+
+export const RECENT_CATCHES_MAX = 20;
+
+/**
+ * The feedback loop actually looping: if the user overrides most warnings,
+ * the thresholds are miscalibrated for them — say so once, in the popup.
+ * Requires a meaningful sample (≥ 20 outcomes) and a >60% override rate.
+ */
+export function shouldShowNoiseHint(settings) {
+  if (!settings || settings.noiseHintDismissed) return false;
+  const o = settings.outcomes || {};
+  const total = (o.redacted || 0) + (o.sentAnyway || 0) + (o.edited || 0);
+  return total >= 20 && (o.sentAnyway || 0) / total > 0.6;
+}
 
 /**
  * Categories that can never be muted: critical secrets where a single miss is
@@ -100,6 +122,13 @@ export function sanitizePatch(patch = {}) {
   }
   if (has('scanAttachments')) out.scanAttachments = !!patch.scanAttachments;
   if (has('onboardingComplete')) out.onboardingComplete = !!patch.onboardingComplete;
+  if (has('catchHistory')) out.catchHistory = !!patch.catchHistory;
+  if (has('noiseHintDismissed')) out.noiseHintDismissed = !!patch.noiseHintDismissed;
+  // History entries are written only by the service worker (recordCatch);
+  // external callers may only CLEAR the list, never inject entries.
+  if (has('recentCatches') && Array.isArray(patch.recentCatches) && patch.recentCatches.length === 0) {
+    out.recentCatches = [];
+  }
   if (has('riskySubmissionsCaught') && Number.isFinite(patch.riskySubmissionsCaught)) {
     out.riskySubmissionsCaught = Math.max(0, Math.floor(patch.riskySubmissionsCaught));
   }
@@ -127,6 +156,30 @@ export async function bumpCatch(area) {
   const next = (riskySubmissionsCaught || 0) + 1;
   await storage.set({ riskySubmissionsCaught: next });
   return next;
+}
+
+/**
+ * Record a catch: bump the counter and, when the user has opted into local
+ * catch history, prepend a MASKED-values-only entry (capped, clearable).
+ * Findings are validated defensively: strings only, length-capped, item-capped.
+ */
+export async function recordCatch(findings, area) {
+  const storage = area || chrome.storage.local;
+  const riskySubmissionsCaught = await bumpCatch(storage);
+  const { catchHistory, recentCatches } = await storage.get({ catchHistory: false, recentCatches: [] });
+  if (catchHistory && Array.isArray(findings) && findings.length) {
+    const items = findings
+      .filter((f) => f && typeof f.category === 'string' && typeof f.masked === 'string')
+      .slice(0, 10)
+      .map((f) => ({ category: f.category.slice(0, 32), masked: f.masked.slice(0, 40) }));
+    if (items.length) {
+      const list = Array.isArray(recentCatches) ? recentCatches : [];
+      await storage.set({
+        recentCatches: [{ t: Date.now(), items }, ...list].slice(0, RECENT_CATCHES_MAX),
+      });
+    }
+  }
+  return { riskySubmissionsCaught };
 }
 
 /**

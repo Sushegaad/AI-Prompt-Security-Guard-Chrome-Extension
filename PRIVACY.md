@@ -30,6 +30,7 @@ The extension uses your browser's local storage (`chrome.storage.local`) to reme
 - Whether onboarding is complete
 - `riskySubmissionsCaught` — a running count of how many times a warning was shown
 - `outcomes` — running counts of what you chose after a warning (redacted / sent anyway / kept editing), so the popup can show you your own stats. These are plain numbers with no prompt content attached
+- **Catch history (optional, off by default)** — if you enable "Keep a local history of catches" in the popup, the last 20 warnings are stored with a timestamp, the category, and the **masked** value only (e.g. `sk-live-••••`). The raw secret is never stored. The list lives only on this device, can be cleared with one click, and is removed on uninstall
 
 This data lives only on your device. It is never uploaded to us. **Prompt text is never part of this stored data.** Uninstalling the extension removes all of it.
 

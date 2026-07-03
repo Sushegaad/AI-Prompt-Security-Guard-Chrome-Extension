@@ -154,6 +154,36 @@ export const IBAN_LENGTHS = {
   SI: 19, SK: 24, TR: 26,
 };
 
+/* --- EU national identifiers (checksum-anchored, same spirit as Luhn) ----- */
+
+/** French NIR / numéro de sécurité sociale: 13 digits + 2-digit key,
+ *  key = 97 − (first 13 digits mod 97). Digits-only form (Corsica letter
+ *  variants intentionally skipped — keyword anchoring would be needed). */
+export function nirValid(digits15) {
+  if (!/^\d{15}$/.test(digits15)) return false;
+  const key = Number(digits15.slice(13));
+  return 97 - (Number(digits15.slice(0, 13)) % 97) === key;
+}
+
+/** German Steuer-ID: 11 digits, ISO 7064 Mod 11,10 check digit. */
+export function steuerIdValid(digits11) {
+  if (!/^[1-9]\d{10}$/.test(digits11)) return false;
+  let product = 10;
+  for (const ch of digits11.slice(0, 10)) {
+    let sum = (Number(ch) + product) % 10;
+    if (sum === 0) sum = 10;
+    product = (sum * 2) % 11;
+  }
+  return (11 - product) % 10 === Number(digits11[10]);
+}
+
+/** Spanish DNI: 8 digits + control letter (n mod 23 into the official table). */
+const DNI_LETTERS = 'TRWAGMYFPDXBNJZSQVHLCKE';
+export function dniValid(digits8, letter) {
+  if (!/^\d{8}$/.test(digits8)) return false;
+  return DNI_LETTERS[Number(digits8) % 23] === letter.toUpperCase();
+}
+
 export function ibanValid(compact) {
   const m = /^([A-Z]{2})(\d{2})([A-Z0-9]{11,30})$/.exec(compact);
   if (!m) return false;
@@ -280,6 +310,14 @@ const RE = {
   // Bare IBAN candidate (optionally space-grouped); ibanValid() (mod-97 +
   // country length) is the real gate, mirroring the Luhn approach for cards.
   ibanCandidate: /\b[A-Z]{2}\d{2}(?:\s?[A-Z0-9]){11,32}\b/g,
+  // French NIR: sex(1|2) yy mm dd dept comm key, standard spacing optional;
+  // nirValid() (mod-97 key) is the gate.
+  nirCandidate: /\b[12]\s?\d{2}\s?(?:0[1-9]|1[0-2]|[2-9]\d)\s?\d{2}\s?\d{3}\s?\d{3}\s?\d{2}\b/g,
+  // German Steuer-ID: keyword-anchored (bare 11-digit numbers collide with
+  // phone numbers); steuerIdValid() (ISO 7064 Mod 11,10) is the gate.
+  steuerId: /\b(?:steuer(?:liche)?[-\s]?id(?:entifikationsnummer)?|steuer[-\s]?idnr|idnr)\.?\s*[:#]?\s*(\d{2}\s?\d{3}\s?\d{3}\s?\d{3}|\d{11})\b/gi,
+  // Spanish DNI/NIF: 8 digits + control letter; dniValid() is the gate.
+  dniCandidate: /\b(\d{8})[-\s]?([A-Z])\b/g,
   account: /(?:\baccount\b|\bacct\b|\ba\/c\b)?\s*#\s?(\d{4,})\b/gi,
   accountWord: /\b(?:account|acct)\s*(?:number|no\.?|#)?\s*:?\s*(\d{4,})\b/gi,
   apiPrefixed:
@@ -499,6 +537,15 @@ export function detect(input) {
   }
   // Bare IBANs — candidate shape gated by mod-97 checksum + country length.
   pushAll(raw, RE.ibanCandidate, 'iban', text, (m) => ibanValid(m[0].replace(/\s+/g, '')));
+  // EU national identifiers (checksum-gated → gov_id, critical).
+  pushAll(raw, RE.nirCandidate, 'gov_id', text, (m) => nirValid(m[0].replace(/\s+/g, '')));
+  for (const m of text.matchAll(RE.steuerId)) {
+    const digits = m[1].replace(/\s+/g, '');
+    if (!steuerIdValid(digits)) continue;
+    const start = m.index + m[0].lastIndexOf(m[1]);
+    raw.push({ category: 'gov_id', rawValue: m[1], start, end: start + m[1].length });
+  }
+  pushAll(raw, RE.dniCandidate, 'gov_id', text, (m) => dniValid(m[1], m[2]));
   // Government IDs (passport, driver's license, national/residence/tax IDs).
   for (const reKey of ['passport', 'driversLicense', 'nationalId']) {
     for (const m of text.matchAll(RE[reKey])) {

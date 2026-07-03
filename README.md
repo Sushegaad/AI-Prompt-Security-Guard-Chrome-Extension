@@ -20,7 +20,9 @@ If you try to send something risky, it pauses and shows a clear warning listing 
 - Pre-send warning that lists what was found, with masked values only.
 - Live risk badge near the input box that updates as you type.
 - One-click redaction that swaps sensitive values for labels like [EMAIL] and [API_KEY].
-- Attachment scanning. Attach a PDF or Word file and it scans the file's text on your device, including hidden comments and metadata.
+- Attachment scanning. Attach a PDF or Word file and it scans the file's text on your device, including hidden comments and metadata. Pasted or attached images get a gentle reminder — screenshots often carry secrets no text scanner can read.
+- US and EU coverage: detection keywords in English, French, German, and Spanish, plus checksum-validated European identifiers (IBAN, French NIR, German Steuer-ID, Spanish DNI) alongside SSNs and cards.
+- Optional local catch history: see your last 20 warnings (masked values only), on-device, clearable.
 - Three sensitivity modes: Basic, Balanced, and Strict.
 - Per-site control from a small popup, plus experimental custom domains: add any https AI site and Chrome asks you to grant access for that one site only.
 - Accessible. Fully keyboard operable with visible focus and screen-reader support, meeting WCAG 2.1 AA and Section 508.
