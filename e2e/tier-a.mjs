@@ -37,14 +37,30 @@ for (const site of SITES) {
     // 1. Composer present (fixture sanity) + content script injected.
     await page.waitForSelector(inputSel, { timeout: 5000 });
 
-    // 2. Type the canary → badge must appear (debounced scan ≈ 300 ms).
+    // 2. Type the canary → badge must appear AND show Critical. The host
+    //    element exists (hidden) from bind time, so waiting for "attached"
+    //    is not enough — poll for the visible, labelled state that follows
+    //    the debounced scan (~300 ms).
     await page.click(inputSel);
     await page.keyboard.type(makeCanary());
-    const badge = page.locator('#asg-badge-host');
-    await badge.waitFor({ state: 'attached', timeout: 5000 });
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('asg-badge-host');
+        return !!host && host.style.display !== 'none';
+      },
+      null,
+      { timeout: 5000 }
+    );
     r.ok(`${site.id}: badge appears on canary`, true);
-    const badgeText = await page.locator('#asg-badge-host .asg-badge').textContent();
-    r.ok(`${site.id}: badge shows Critical`, /Critical/i.test(badgeText || ''));
+    await page.waitForFunction(
+      () => {
+        const host = document.getElementById('asg-badge-host');
+        return !!host && !!host.shadowRoot && /Critical/i.test(host.shadowRoot.textContent || '');
+      },
+      null,
+      { timeout: 5000 }
+    );
+    r.ok(`${site.id}: badge shows Critical`, true);
 
     // 3. Enter must be intercepted: modal opens, the site did NOT send.
     await page.press(inputSel, 'Enter');
