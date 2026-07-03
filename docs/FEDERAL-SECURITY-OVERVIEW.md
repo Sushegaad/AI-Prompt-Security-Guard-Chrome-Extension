@@ -1,6 +1,6 @@
 # AI Safety Guard — Federal Security Overview
 
-One-page summary for agency security reviewers (ISSO / Authorizing Official). Version 1.1.0, July 2026.
+One-page summary for agency security reviewers (ISSO / Authorizing Official). Version 1.0.0, July 2026 build.
 
 ## What it is
 

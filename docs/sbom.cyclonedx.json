@@ -3,9 +3,9 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:fe770b32-5d8d-4f49-8c8a-0c5dc8e614df",
+  "serialNumber": "urn:uuid:48e9e440-31cf-4030-9b88-f4c633bb21ad",
   "metadata": {
-    "timestamp": "2026-07-03T18:47:07.308Z",
+    "timestamp": "2026-07-03T19:21:59.814Z",
     "tools": {
       "components": [
         {
@@ -82,8 +82,8 @@
     "component": {
       "type": "application",
       "name": "ai-safety-guard",
-      "version": "1.1.0",
-      "bom-ref": "ai-safety-guard@1.1.0",
+      "version": "1.0.0",
+      "bom-ref": "ai-safety-guard@1.0.0",
       "description": "A free Chrome extension that warns you before you send private information to an AI tool. Calm, plain-English, helpful — never punitive. Scanning happens on your device.",
       "licenses": [
         {
@@ -93,7 +93,7 @@
           }
         }
       ],
-      "purl": "pkg:npm/ai-safety-guard@1.1.0",
+      "purl": "pkg:npm/ai-safety-guard@1.0.0",
       "properties": [
         {
           "name": "cdx:npm:package:private",
@@ -111,7 +111,7 @@
       "type": "library",
       "name": "fflate",
       "version": "0.8.3",
-      "bom-ref": "ai-safety-guard@1.1.0|fflate@0.8.3",
+      "bom-ref": "ai-safety-guard@1.0.0|fflate@0.8.3",
       "author": "Arjun Barrett",
       "description": "High performance (de)compression in an 8kB package",
       "licenses": [
@@ -142,13 +142,7 @@
         {
           "url": "https://registry.npmjs.org/fflate/-/fflate-0.8.3.tgz",
           "type": "distribution",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "b5b64db89acbc06529df3b2106d772e16f8e47166e221f1ae629722044030b9ad8d5fdd4db424caf2d0b977581cd4e7c1192ac12e2455e16f9830bfc0ac3ef80"
-            }
-          ],
-          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+          "comment": "as detected from npm-ls property \"resolved\""
         }
       ],
       "properties": [
@@ -162,7 +156,7 @@
       "type": "library",
       "name": "pdfjs-dist",
       "version": "6.1.200",
-      "bom-ref": "ai-safety-guard@1.1.0|pdfjs-dist@6.1.200",
+      "bom-ref": "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200",
       "description": "Generic build of Mozilla's PDF.js library.",
       "licenses": [
         {
@@ -192,13 +186,7 @@
         {
           "url": "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-6.1.200.tgz",
           "type": "distribution",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "a3c328972ce2ae490badc76c69efc710e888717588ec34b9cc6a6fa96f314c2d9852c5b7d2b96d170d9b0c6bf0fdfb2451d10cad09b66ebebc8f30d2e411f6bf"
-            }
-          ],
-          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+          "comment": "as detected from npm-ls property \"resolved\""
         }
       ],
       "properties": [
@@ -213,9 +201,8 @@
       "name": "canvas",
       "group": "@napi-rs",
       "version": "1.0.1",
-      "bom-ref": "ai-safety-guard@1.1.0|@napi-rs/canvas@1.0.1",
+      "bom-ref": "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1",
       "description": "Canvas for Node.js with skia backend",
-      "scope": "optional",
       "licenses": [
         {
           "license": {
@@ -244,13 +231,7 @@
         {
           "url": "https://registry.npmjs.org/@napi-rs/canvas/-/canvas-1.0.1.tgz",
           "type": "distribution",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "98f0f8dc6ee95db4212066bbcf82294ffbd79b58db17c701335a18e54aa32fc2d269308d1a1362d8b89d73fd3e2f029b362a9bbff4ead099414702aef8b5b78b"
-            }
-          ],
-          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+          "comment": "as detected from npm-ls property \"resolved\""
         }
       ],
       "properties": [
@@ -265,9 +246,8 @@
       "name": "canvas-linux-arm64-gnu",
       "group": "@napi-rs",
       "version": "1.0.1",
-      "bom-ref": "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1",
+      "bom-ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1",
       "description": "Canvas for Node.js with skia backend",
-      "scope": "optional",
       "licenses": [
         {
           "license": {
@@ -296,13 +276,7 @@
         {
           "url": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-gnu/-/canvas-linux-arm64-gnu-1.0.1.tgz",
           "type": "distribution",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "8bbe33a84879c85998c0792ccc5a3ee041f89790130f86d29491b6d625b68f9929aa23766f458df521bfc5dab63bad0c8d92b464b4aeddafd9dda400b260d0e4"
-            }
-          ],
-          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+          "comment": "as detected from npm-ls property \"resolved\""
         }
       ],
       "properties": [
@@ -317,9 +291,8 @@
       "name": "canvas-linux-arm64-musl",
       "group": "@napi-rs",
       "version": "1.0.1",
-      "bom-ref": "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-musl@1.0.1",
+      "bom-ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-musl@1.0.1",
       "description": "Canvas for Node.js with skia backend",
-      "scope": "optional",
       "licenses": [
         {
           "license": {
@@ -348,13 +321,7 @@
         {
           "url": "https://registry.npmjs.org/@napi-rs/canvas-linux-arm64-musl/-/canvas-linux-arm64-musl-1.0.1.tgz",
           "type": "distribution",
-          "hashes": [
-            {
-              "alg": "SHA-512",
-              "content": "08ea81c726d770a6fa80d804863874e2b3c7ae9b0907e9ffe7ea78c923e04169748bec553581e7e2bbf30ad501205a8e818e87109f5468fe9ce16f44330cdfa5"
-            }
-          ],
-          "comment": "as detected from npm-ls property \"resolved\" and property \"integrity\""
+          "comment": "as detected from npm-ls property \"resolved\""
         }
       ],
       "properties": [
@@ -367,33 +334,33 @@
   ],
   "dependencies": [
     {
-      "ref": "ai-safety-guard@1.1.0",
+      "ref": "ai-safety-guard@1.0.0",
       "dependsOn": [
-        "ai-safety-guard@1.1.0|fflate@0.8.3",
-        "ai-safety-guard@1.1.0|pdfjs-dist@6.1.200"
+        "ai-safety-guard@1.0.0|fflate@0.8.3",
+        "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200"
       ]
     },
     {
-      "ref": "ai-safety-guard@1.1.0|fflate@0.8.3"
+      "ref": "ai-safety-guard@1.0.0|fflate@0.8.3"
     },
     {
-      "ref": "ai-safety-guard@1.1.0|pdfjs-dist@6.1.200",
+      "ref": "ai-safety-guard@1.0.0|pdfjs-dist@6.1.200",
       "dependsOn": [
-        "ai-safety-guard@1.1.0|@napi-rs/canvas@1.0.1"
+        "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1"
       ]
     },
     {
-      "ref": "ai-safety-guard@1.1.0|@napi-rs/canvas@1.0.1",
+      "ref": "ai-safety-guard@1.0.0|@napi-rs/canvas@1.0.1",
       "dependsOn": [
-        "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1",
-        "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-musl@1.0.1"
+        "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1",
+        "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-musl@1.0.1"
       ]
     },
     {
-      "ref": "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1"
+      "ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-gnu@1.0.1"
     },
     {
-      "ref": "ai-safety-guard@1.1.0|@napi-rs/canvas-linux-arm64-musl@1.0.1"
+      "ref": "ai-safety-guard@1.0.0|@napi-rs/canvas-linux-arm64-musl@1.0.1"
     }
   ]
 }

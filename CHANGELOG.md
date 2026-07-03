@@ -3,12 +3,20 @@
 All notable changes to AI Safety Guard. Selector bumps get their own lines so
 store reviewers can see exactly what changed and why.
 
-## v1.1.0 — July 2026
+## Unreleased — ships with the Chrome Web Store submission
 
 ### Detection
 - Fixed systematic misses: hex-only API keys (charset-relative entropy), PEM
   private keys, JWTs, credential-bearing webhook URLs, dash-less/spaced SSNs
   (keyword-anchored), bare IBANs (mod-97 validated), dot-separated card numbers.
+- Redaction completeness: keyword and name detectors now emit a span for EVERY
+  occurrence (one modal row per category; the rest are hidden redaction spans),
+  and redaction labels like `[IBAN]` no longer re-trigger keyword detection —
+  previously a leftover second occurrence kept the post-redact rescan unsafe
+  and "Looks good — send" permanently disabled.
+- Stale badge fix: the composer is re-scanned when the page settles and after a
+  send, so a site clearing the input programmatically (no `input` event) no
+  longer leaves a "High risk" badge over an empty box.
 - Input normalization: zero-width characters stripped and line-wrapped secrets
   joined before scanning; match offsets still map to the original text.
 
@@ -41,12 +49,12 @@ store reviewers can see exactly what changed and why.
 ### Documentation & compliance
 - Federal security overview rewritten for the new permission model (scripting +
   per-origin optional grants, enterprise policy note).
-- VPAT re-issued for 1.1.0: 3.3.1 and 3.3.3 move from Not Applicable to
+- VPAT re-issued: 3.3.1 and 3.3.3 move from Not Applicable to
   Supports (inline, live-region-announced domain validation errors).
 - Accessibility audit addendum covering the v1.1 surfaces (mute buttons,
   domain status messages, unmute section). No new A/AA findings; F7 advisory
   remains open.
-- SBOM regenerated as 1.1.0; PRIVACY.md and site copy updated (counters,
+- SBOM regenerated; PRIVACY.md and site copy updated (counters,
   per-site permissions).
 
 ### Selector versions

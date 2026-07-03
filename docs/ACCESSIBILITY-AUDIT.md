@@ -1,6 +1,6 @@
 # AI Safety Guard — Section 508 / WCAG 2.1 AA Accessibility Audit
 
-Date: June 2026 (v1.0.0 audit) with a July 2026 addendum covering the v1.1.0 additions (see "Addendum" at the end). Standard: WCAG 2.1 Level AA, as incorporated by the Revised Section 508 standards (36 CFR Part 1194). Method: manual source review of the user-facing surfaces plus programmatic color-contrast calculation. This is an internal pre-submission audit; it feeds the VPAT/ACR in `VPAT.md`.
+Date: June 2026 (initial audit) with a July 2026 addendum covering surfaces added since (see "Addendum" at the end). Version audited: 1.0.0. Standard: WCAG 2.1 Level AA, as incorporated by the Revised Section 508 standards (36 CFR Part 1194). Method: manual source review of the user-facing surfaces plus programmatic color-contrast calculation. This is an internal pre-submission audit; it feeds the VPAT/ACR in `VPAT.md`.
 
 ## Scope
 
@@ -119,9 +119,9 @@ After these, the VPAT can move F1–F6 from "Partially Supports" to "Supports." 
 
 ---
 
-## Addendum — v1.1.0 surfaces (July 2026)
+## Addendum — newer surfaces (July 2026)
 
-Version 1.1.0 added interactive surface after the original audit. Reviewed by the same method (manual source review + contrast check of new styles):
+The July 2026 build added interactive surface after the original audit. Reviewed by the same method (manual source review + contrast check of new styles):
 
 ### A1 — Per-finding mute buttons in the warning dialog
 
@@ -141,4 +141,4 @@ A new section lists muted categories with per-row "Unmute" buttons, each labelle
 
 ### Addendum verdict
 
-No new findings at Level A or AA. F7 (advisory `aria-describedby` on the disabled send button) remains the only open item, unchanged from v1.0.0. A manual NVDA/VoiceOver pass over the mute → re-render → focus path is recommended as part of the pre-submission screen-reader check.
+No new findings at Level A or AA. F7 (advisory `aria-describedby` on the disabled send button) remains the only open item, unchanged from the original audit. A manual NVDA/VoiceOver pass over the mute → re-render → focus path is recommended as part of the pre-submission screen-reader check.

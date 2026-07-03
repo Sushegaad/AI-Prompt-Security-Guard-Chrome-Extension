@@ -4,7 +4,7 @@
 
 Based on VPAT Version 2.5 (Revised Section 508 edition).
 
-This is a self-assessment prepared by the product author, intended to accompany the extension when it is offered to a federal agency. It reflects the source code as of version 1.1.0 (July 2026), including the v1.1 additions audited in the addendum to `ACCESSIBILITY-AUDIT.md` (per-category mute controls, the custom-domain permission flow with inline status messages, and the muted-warnings/unmute section). The remediation described in `ACCESSIBILITY-AUDIT.md` (findings F1 through F6) has been implemented and is covered by automated tests, and this report reflects that remediated build. It has not yet been validated by an independent third party; an independent evaluation can be arranged on request.
+This is a self-assessment prepared by the product author, intended to accompany the extension when it is offered to a federal agency. It reflects the source code as of version 1.0.0 (July 2026 build), including the newer surfaces audited in the addendum to `ACCESSIBILITY-AUDIT.md` (per-category mute controls, the custom-domain permission flow with inline status messages, and the muted-warnings/unmute section). The remediation described in `ACCESSIBILITY-AUDIT.md` (findings F1 through F6) has been implemented and is covered by automated tests, and this report reflects that remediated build. It has not yet been validated by an independent third party; an independent evaluation can be arranged on request.
 
 ---
 
@@ -13,7 +13,7 @@ This is a self-assessment prepared by the product author, intended to accompany 
 | Field | Value |
 |-------|-------|
 | Name | AI Safety Guard |
-| Version | 1.1.0 |
+| Version | 1.0.0 (July 2026 build) |
 | Product description | A free, on-device Chrome extension (Manifest V3) that warns the user before sensitive information is sent to an AI chat tool. All scanning is local; no user content leaves the browser. |
 | Date | July 2026 |
 | Contact | Hemant Naik, hemant.naik@gmail.com |

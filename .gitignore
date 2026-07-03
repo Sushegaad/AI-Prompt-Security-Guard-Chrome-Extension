@@ -15,9 +15,6 @@ web-ext-artifacts/
 # AI assistant context (kept local)
 CLAUDE.md
 
-# Release notes draft (kept local)
-CHANGELOG.md
-
 # OS / editor
 .DS_Store
 *.log
