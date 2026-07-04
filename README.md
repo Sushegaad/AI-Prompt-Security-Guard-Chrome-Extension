@@ -6,6 +6,19 @@
 
 <p align="center"><b>Think before you send.</b><br />A free Chrome extension that warns you before private information reaches an AI tool. All scanning happens on your device.</p>
 
+## See it in action
+
+▶️ **[Watch the 1-minute demo](https://youtu.be/cRWgHaxGqjY)** — type a secret, the badge turns red, the warning opens, one click redacts.
+
+[![AI Safety Guard demo](store-assets/promo-marquee.png)](https://youtu.be/cRWgHaxGqjY)
+
+| | |
+|---|---|
+| ![Pre-send warning with masked findings](store-assets/screenshot-2-warning.png) | ![Identifying sensitive information as you type](store-assets/screenshot-3-findings.png) |
+| ![One-click redaction, rescanned safe](store-assets/screenshot-4-redacted.png) | ![Settings popup: sensitivity, sites, catch history](store-assets/screenshot-5-settings.png) |
+
+*These are the screenshots submitted to the Chrome Web Store ([installation](store-assets/screenshot-1-installation.png) shot included there too).*
+
 ## What this does
 
 <img src="assets/icons/icon48.png" width="20" height="20" align="left" alt="" />
