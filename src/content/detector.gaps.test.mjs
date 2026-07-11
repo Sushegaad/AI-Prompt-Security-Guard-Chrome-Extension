@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Workstream 1 gap-coverage tests
+ * AI Prompt - Security Guard — Workstream 1 gap-coverage tests
  * Run: node src/content/detector.gaps.test.mjs
  * Covers: input normalization, charset-relative entropy, PEM, JWT, webhook
  * URLs, keyword-anchored SSNs, bare IBANs (mod-97), dot-separated cards.

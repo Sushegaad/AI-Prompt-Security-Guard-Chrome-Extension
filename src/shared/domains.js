@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Custom-domain helpers (single source)
+ * AI Prompt - Security Guard — Custom-domain helpers (single source)
  * ----------------------------------------------------------------------------
  * Validation/normalization of user-entered custom domains, plus the derived
  * origin patterns and dynamic-content-script ids. Used by the popup (input

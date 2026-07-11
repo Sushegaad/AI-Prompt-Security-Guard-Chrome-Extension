@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Secure Composer logic (Shield Mode iframe)
+ * AI Prompt - Security Guard — Secure Composer logic (Shield Mode iframe)
  * ----------------------------------------------------------------------------
  * Runs INSIDE the extension-origin iframe. The provider page cannot read this
  * document. Responsibilities:

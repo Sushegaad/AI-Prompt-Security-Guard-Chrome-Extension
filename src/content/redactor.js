@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Redactor (B1 support)
+ * AI Prompt - Security Guard — Redactor (B1 support)
  * ----------------------------------------------------------------------------
  * Pure text transform: replace every detected raw value with its [TYPE] label.
  * Replacement runs right-to-left (highest start index first) so earlier offsets

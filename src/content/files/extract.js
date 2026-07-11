@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — File text extraction (content-script side)
+ * AI Prompt - Security Guard — File text extraction (content-script side)
  * ----------------------------------------------------------------------------
  * DOCX is parsed inline (fflate is tiny, pure, synchronous). PDF parsing does
  * NOT happen here: pdf.js needs a worker and would force a dynamic chunk into

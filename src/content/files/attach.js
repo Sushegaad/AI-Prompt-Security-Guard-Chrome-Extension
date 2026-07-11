@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Attachment watcher
+ * AI Prompt - Security Guard — Attachment watcher
  * ----------------------------------------------------------------------------
  * Detects when a file is being attached to the page, three ways:
  *   - a file <input> firing 'change' (capture phase)

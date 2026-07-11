@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Custom-domain tests (Workstream 3)
+ * AI Prompt - Security Guard — Custom-domain tests (Workstream 3)
  * Run: node src/background/custom-domains.test.mjs
  * Covers: hostname validation/normalization, storage sanitization via the
  * shared validator, service-worker registration reconciliation, and the

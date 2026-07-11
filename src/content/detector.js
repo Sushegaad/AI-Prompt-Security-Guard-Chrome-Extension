@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Detection Engine (detector.js)
+ * AI Prompt - Security Guard — Detection Engine (detector.js)
  * ----------------------------------------------------------------------------
  * The product's core. Runs ENTIRELY on-device. No text leaves the browser
  * during a scan. `detect()` is a PURE, SYNCHRONOUS function:

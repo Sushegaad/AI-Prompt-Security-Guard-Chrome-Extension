@@ -1,4 +1,4 @@
-# AI Safety Guard — two-tier e2e
+# AI Prompt - Security Guard — two-tier e2e
 #
 # Tier A (hermetic fixtures): every PR + weekly. Deterministic; failures block.
 # Tier B (live drift probe):  weekly + manual. Advisory; drift files/refreshes

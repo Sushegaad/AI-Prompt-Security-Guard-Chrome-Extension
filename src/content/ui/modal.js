@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Screen A2: Pre-Submit Warning Modal (the centerpiece)
+ * AI Prompt - Security Guard — Screen A2: Pre-Submit Warning Modal (the centerpiece)
  * ----------------------------------------------------------------------------
  * Appears when the user tries to send and the risk meets the sensitivity
  * threshold. Owns a single shadow-root overlay shared by A2 → B1 (redact).
@@ -45,7 +45,7 @@ export function createModal(doc = document) {
     card = h('div.asg-card', {
       role: 'dialog',
       'aria-modal': 'true',
-      'aria-label': 'AI Safety Guard',
+      'aria-label': 'AI Prompt - Security Guard',
       tabindex: '-1',
     });
     overlay.appendChild(card);
@@ -94,7 +94,7 @@ export function createModal(doc = document) {
       card.removeAttribute('aria-label');
     } else {
       card.removeAttribute('aria-labelledby');
-      card.setAttribute('aria-label', 'AI Safety Guard');
+      card.setAttribute('aria-label', 'AI Prompt - Security Guard');
     }
     // Move focus into the dialog (first actionable control, else the card).
     const list = focusables();
@@ -103,7 +103,7 @@ export function createModal(doc = document) {
 
   function head() {
     return h('div.asg-card__head', {}, [
-      h('span.asg-wordmark', {}, [h('span.asg-wordmark__dot'), 'AI Safety Guard']),
+      h('span.asg-wordmark', {}, [h('span.asg-wordmark__dot'), 'AI Prompt - Security Guard']),
       h('button.asg-x', { text: '×', 'aria-label': 'Close', onclick: close }),
     ]);
   }

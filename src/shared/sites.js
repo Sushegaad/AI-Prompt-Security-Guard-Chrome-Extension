@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Supported-site registry (single source of truth)
+ * AI Prompt - Security Guard — Supported-site registry (single source of truth)
  * ----------------------------------------------------------------------------
  * Everything about a supported AI site lives here once: its id, label, the
  * onboarding group it belongs to, whether it appears in the popup, the host(s)

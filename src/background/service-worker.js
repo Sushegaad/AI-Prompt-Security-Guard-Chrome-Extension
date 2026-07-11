@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Background Service Worker (MV3)
+ * AI Prompt - Security Guard — Background Service Worker (MV3)
  * ----------------------------------------------------------------------------
  * The single owner of chrome.storage reads/writes and the message hub for
  * content scripts / popup / onboarding.

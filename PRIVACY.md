@@ -1,9 +1,9 @@
-# AI Safety Guard — Privacy Policy
+# AI Prompt - Security Guard — Privacy Policy
 
 **Effective date:** June 27, 2026
-**Applies to:** AI Safety Guard Chrome Extension (v1.0.0)
+**Applies to:** AI Prompt - Security Guard Chrome Extension (v1.0.0)
 
-AI Safety Guard is built on a simple promise: **your prompts are scanned on your own device, and nothing you type is collected, transmitted, or stored by us.** This policy explains exactly what the extension does and does not do with your information.
+AI Prompt - Security Guard is built on a simple promise: **your prompts are scanned on your own device, and nothing you type is collected, transmitted, or stored by us.** This policy explains exactly what the extension does and does not do with your information.
 
 ## Summary (the short version)
 
@@ -13,7 +13,7 @@ AI Safety Guard is built on a simple promise: **your prompts are scanned on your
 
 ## What the extension does
 
-When you type into a supported AI tool (ChatGPT, Claude, Gemini, Perplexity, Microsoft Copilot, or a custom domain you add), AI Safety Guard scans the text in your input box for sensitive information — things like email addresses, phone numbers, credit-card and Social Security numbers, API keys, passwords, and confidential business, legal, financial, or health language.
+When you type into a supported AI tool (ChatGPT, Claude, Gemini, Perplexity, Microsoft Copilot, or a custom domain you add), AI Prompt - Security Guard scans the text in your input box for sensitive information — things like email addresses, phone numbers, credit-card and Social Security numbers, API keys, passwords, and confidential business, legal, financial, or health language.
 
 This scanning is performed entirely by code running inside your browser. The text is analyzed in memory and discarded; it is not written to disk, sent to any server, or shared with us or anyone else.
 
@@ -56,7 +56,7 @@ We do not sell, rent, or share your data. We do not serve ads. Because we do not
 
 ## Children
 
-AI Safety Guard is a general-purpose productivity tool and is not directed to children under 13.
+AI Prompt - Security Guard is a general-purpose productivity tool and is not directed to children under 13.
 
 ## Changes to this policy
 

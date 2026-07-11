@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — fixture/registry drift guard (runs in npm test, no browser)
+ * AI Prompt - Security Guard — fixture/registry drift guard (runs in npm test, no browser)
  * ----------------------------------------------------------------------------
  * The Tier A e2e relies on e2e/fixtures/<site>.html reproducing each site's
  * composer DOM. This jsdom check guarantees every fixture keeps matching the

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — DOCX text extraction (on-device)
+ * AI Prompt - Security Guard — DOCX text extraction (on-device)
  * ----------------------------------------------------------------------------
  * A .docx is a ZIP of XML parts. We unzip in the browser (fflate, a few KB) and
  * pull text from the body AND the places PII likes to hide: comments, tracked

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Shield Mode tests
+ * AI Prompt - Security Guard — Shield Mode tests
  * Run: node src/background/shield.test.mjs
  * Covers: settings schema (shieldMode / perSiteNoticeSeen), sanitization, and
  * the service-worker relay that routes approved text from the secure-composer

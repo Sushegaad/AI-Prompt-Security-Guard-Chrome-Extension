@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — DOM read/write helpers
+ * AI Prompt - Security Guard — DOM read/write helpers
  * ----------------------------------------------------------------------------
  * AI tools use either <textarea> or div[contenteditable]. Reading and writing
  * differ, and contenteditable sites need a synthetic 'input' event so their own

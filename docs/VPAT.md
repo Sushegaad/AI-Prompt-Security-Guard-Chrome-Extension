@@ -1,6 +1,6 @@
 # Accessibility Conformance Report (ACR)
 
-## AI Safety Guard — Chrome Extension
+## AI Prompt - Security Guard — Chrome Extension
 
 Based on VPAT Version 2.5 (Revised Section 508 edition).
 
@@ -12,7 +12,7 @@ This is a self-assessment prepared by the product author, intended to accompany 
 
 | Field | Value |
 |-------|-------|
-| Name | AI Safety Guard |
+| Name | AI Prompt - Security Guard |
 | Version | 1.0.0 (July 2026 build) |
 | Product description | A free, on-device Chrome extension (Manifest V3) that warns the user before sensitive information is sent to an AI chat tool. All scanning is local; no user content leaves the browser. |
 | Date | July 2026 |

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Detection Engine tests
+ * AI Prompt - Security Guard — Detection Engine tests
  * Run: npm test   (node src/content/detector.test.mjs)
  * Pure assertions, no test framework. Exits non-zero on any failure.
  * ========================================================================== */

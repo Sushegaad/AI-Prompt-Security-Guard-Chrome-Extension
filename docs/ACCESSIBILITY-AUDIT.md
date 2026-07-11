@@ -1,4 +1,4 @@
-# AI Safety Guard — Section 508 / WCAG 2.1 AA Accessibility Audit
+# AI Prompt - Security Guard — Section 508 / WCAG 2.1 AA Accessibility Audit
 
 Date: June 2026 (initial audit) with a July 2026 addendum covering surfaces added since (see "Addendum" at the end). Version audited: 1.0.0. Standard: WCAG 2.1 Level AA, as incorporated by the Revised Section 508 standards (36 CFR Part 1194). Method: manual source review of the user-facing surfaces plus programmatic color-contrast calculation. This is an internal pre-submission audit; it feeds the VPAT/ACR in `VPAT.md`.
 
@@ -70,7 +70,7 @@ Fix: add a `:focus-visible` outline (for example `outline: 2px solid var(--color
 
 ### F4 — Dialog is named by brand, not purpose; selected option not exposed (2.4.6 AA, 4.1.2 A)
 
-The modal sets `aria-label: 'AI Safety Guard'` (`modal.js`), so a screen reader announces the brand rather than the visible heading "Before you send this." The actual title is an `<h2>` (`.asg-title`) that is not referenced. Separately, the onboarding option cards (F1) convey their selected state only through a CSS class, not through ARIA.
+The modal sets `aria-label: 'AI Prompt - Security Guard'` (`modal.js`), so a screen reader announces the brand rather than the visible heading "Before you send this." The actual title is an `<h2>` (`.asg-title`) that is not referenced. Separately, the onboarding option cards (F1) convey their selected state only through a CSS class, not through ARIA.
 
 Fix: give the `<h2>` an id and point the dialog at it with `aria-labelledby` instead of a static `aria-label`; the file warning variant should reference its own title. For the options, add `aria-pressed` (button pattern) or `role="radio"` with `aria-checked` in a `role="radiogroup"`.
 

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Static privacy audit
+ * AI Prompt - Security Guard — Static privacy audit
  * Run: npm run audit:privacy   (node scripts/privacy-audit.mjs)
  *
  * Enforces the product's core privacy promises by scanning the source tree:
@@ -50,7 +50,7 @@ const note = (label, passOk, detail = '') => {
   if (!passOk) failed++;
 };
 
-console.log('AI Safety Guard — privacy audit\n');
+console.log('AI Prompt - Security Guard — privacy audit\n');
 
 /* 1. Network egress surface ------------------------------------------------ */
 // The MVP has NO cloud feature at all. The only network API used is the

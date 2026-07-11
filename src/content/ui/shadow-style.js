@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Shadow-DOM styling
+ * AI Prompt - Security Guard — Shadow-DOM styling
  * ----------------------------------------------------------------------------
  * All injected UI (badge, modal, redact) lives inside a shadow root to
  * isolate it from the host site's CSS. Fonts are NOT inherited into shadow

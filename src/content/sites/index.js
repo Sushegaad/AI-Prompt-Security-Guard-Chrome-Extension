@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Site adapter dispatcher
+ * AI Prompt - Security Guard — Site adapter dispatcher
  * ----------------------------------------------------------------------------
  * Builds one adapter per registry entry (shared/sites.js) and resolves the
  * adapter for the current hostname. Custom domains added by the user fall back

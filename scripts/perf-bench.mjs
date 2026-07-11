@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Detector performance benchmark
+ * AI Prompt - Security Guard — Detector performance benchmark
  * Run: npm run bench   (node scripts/perf-bench.mjs)
  * Times detect() across 100 / 1,000 / 5,000 / 10,000 char inputs.
  * Target: < 50ms on typical inputs (design shows 18ms). Exits non-zero if the
@@ -43,7 +43,7 @@ function bench(text, iterations) {
 const SIZES = [100, 1000, 5000, 10000];
 const ITER = 200;
 
-console.log('AI Safety Guard — detector performance');
+console.log('AI Prompt - Security Guard — detector performance');
 console.log('iterations per size:', ITER, '\n');
 console.log('  chars     min      avg      p95      max     findings');
 console.log('  ' + '-'.repeat(56));

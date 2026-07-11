@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — EU / multilingual detection tests
+ * AI Prompt - Security Guard — EU / multilingual detection tests
  * Run: node src/content/detector.i18n.test.mjs
  * Covers: FR/DE/ES keyword packs and the three checksum-anchored EU
  * identifiers (French NIR, German Steuer-ID, Spanish DNI).

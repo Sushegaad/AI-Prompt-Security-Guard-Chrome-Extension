@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — CSP-safe font loading
+ * AI Prompt - Security Guard — CSP-safe font loading
  * ----------------------------------------------------------------------------
  * AI sites ship strict CSPs whose `font-src` does NOT allow chrome-extension:.
  * A @font-face that fetches chrome-extension://…woff2 at render time is refused,

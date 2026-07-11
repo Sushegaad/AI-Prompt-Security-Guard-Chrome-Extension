@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Settings storage & message protocol
+ * AI Prompt - Security Guard — Settings storage & message protocol
  * ----------------------------------------------------------------------------
  * Single source of truth for the settings schema and the message types used
  * between content scripts / popup / onboarding and the service worker.

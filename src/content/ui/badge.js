@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Screen A1: Inline Risk Badge
+ * AI Prompt - Security Guard — Screen A1: Inline Risk Badge
  * ----------------------------------------------------------------------------
  * A quiet indicator anchored just outside the AI input box. Lives in its own
  * shadow root (style isolation). Updates as you type.

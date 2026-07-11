@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — v1.1 sensitivity-retune tests (Workstream 2)
+ * AI Prompt - Security Guard — v1.1 sensitivity-retune tests (Workstream 2)
  * Run: node src/content/retune.test.mjs
  * Covers: balanced threshold change, source_code interrupt:false gate,
  * labeledId strong/weak split, per-category mute (filter + storage guards +

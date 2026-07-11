@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — File attachment scanning tests
+ * AI Prompt - Security Guard — File attachment scanning tests
  * Run: node src/content/files/files.test.mjs
  * Covers DOCX extraction (real fflate zip), PDF page-walk (mock doc), file-kind
  * classification, the attach watcher, and the file warning modal.

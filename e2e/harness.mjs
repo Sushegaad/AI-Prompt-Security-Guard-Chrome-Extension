@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — e2e harness (Playwright + built extension)
+ * AI Prompt - Security Guard — e2e harness (Playwright + built extension)
  * ----------------------------------------------------------------------------
  * Launches Chromium with the BUILT extension (dist/) in a throwaway profile.
  * Requires `npm run build` first and `npx playwright install chromium` once.

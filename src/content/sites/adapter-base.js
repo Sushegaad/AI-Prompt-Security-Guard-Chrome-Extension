@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Site adapter helpers
+ * AI Prompt - Security Guard — Site adapter helpers
  * ----------------------------------------------------------------------------
  * AI sites change their DOM often. Each adapter declares a PRIMARY selector
  * plus FALLBACKS; firstMatch tries them in order and warns (once) when nothing

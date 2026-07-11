@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — generate src/shared/tokens.css from the style source
+ * AI Prompt - Security Guard — generate src/shared/tokens.css from the style source
  * Run: npm run gen:tokens  (also runs automatically on prebuild)
  *
  * constants.js is the single source of token VALUES; shared/styles.js turns
@@ -20,7 +20,7 @@ export const rootVars = tokenVars;
 export function generateTokensCss() {
   return (
     '/* ============================================================================\n' +
-    ' * AI Safety Guard — Design Tokens (GENERATED from constants.js — do not edit)\n' +
+    ' * AI Prompt - Security Guard — Design Tokens (GENERATED from constants.js — do not edit)\n' +
     ' * Regenerate with: npm run gen:tokens\n' +
     ' * ==========================================================================*/\n\n' +
     cssVars(':root') +

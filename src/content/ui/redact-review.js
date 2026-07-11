@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Screen B1: Redact & Review
+ * AI Prompt - Security Guard — Screen B1: Redact & Review
  * ----------------------------------------------------------------------------
  * Reached from A2 "Redact sensitive data". The input has been rewritten in place
  * with [TYPE] label chips; this panel lets the user read it over, then send.

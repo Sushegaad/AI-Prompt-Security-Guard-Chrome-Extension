@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Design System Constants (Design v1)
+ * AI Prompt - Security Guard — Design System Constants (Design v1)
  * ----------------------------------------------------------------------------
  * JS mirror of tokens.css. Use these in detector logic, badge/modal rendering,
  * popup, and onboarding so behavior and color stay in lockstep with the CSS.

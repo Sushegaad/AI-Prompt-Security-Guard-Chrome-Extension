@@ -1,9 +1,15 @@
 # Changelog
 
-All notable changes to AI Safety Guard. Selector bumps get their own lines so
+All notable changes to AI Prompt - Security Guard. Selector bumps get their own lines so
 store reviewers can see exactly what changed and why.
 
 ## Unreleased — ships with the Chrome Web Store submission
+
+### Product rename
+- "AI Safety Guard" → "AI Prompt - Security Guard" across manifest, all UI
+  surfaces (popup, onboarding, modal wordmark, secure composer), log prefix,
+  docs, site copy and package name. Internal `asg-`/`.asg` prefixes and
+  element ids unchanged (not user-facing; avoids breaking selectors/tests).
 
 ### EU / multilingual detection
 - French, German and Spanish keyword packs across health, workplace,

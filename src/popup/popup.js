@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Toolbar Popup (Screen D)
+ * AI Prompt - Security Guard — Toolbar Popup (Screen D)
  * ----------------------------------------------------------------------------
  * Reads live settings from the service worker, renders the controls, and
  * persists every change immediately (no Save button) via SET_SETTINGS.

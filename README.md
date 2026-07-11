@@ -1,20 +1,20 @@
 <p align="center">
-  <img src="assets/icons/icon128.png" width="88" height="88" alt="AI Safety Guard logo" />
+  <img src="assets/icons/icon128.png" width="88" height="88" alt="AI Prompt - Security Guard logo" />
 </p>
 
-<h1 align="center">AI Safety Guard</h1>
+<h1 align="center">AI Prompt - Security Guard</h1>
 
 <p align="center"><b>Think before you send.</b><br />A free Chrome extension that warns you before private information reaches an AI tool. All scanning happens on your device.</p>
 
 ## Install
 
-🛡️ **[Get AI Safety Guard on the Chrome Web Store](https://chromewebstore.google.com/detail/ai-safety-guard/ghjnpbnohiidngnjcfkehdnnpbkkhfdp)** — free, no account needed.
+🛡️ **[Get AI Prompt - Security Guard on the Chrome Web Store](https://chromewebstore.google.com/detail/ai-prompt-security-guard/ghjnpbnohiidngnjcfkehdnnpbkkhfdp)** — free, no account needed.
 
 ## See it in action
 
 ▶️ **[Watch the 1-minute demo](https://youtu.be/cRWgHaxGqjY)** — type a secret, the badge turns red, the warning opens, one click redacts.
 
-[![AI Safety Guard demo](store-assets/promo-marquee.png)](https://youtu.be/cRWgHaxGqjY)
+[![AI Prompt - Security Guard demo](store-assets/promo-marquee.png)](https://youtu.be/cRWgHaxGqjY)
 
 | | |
 |---|---|
@@ -27,7 +27,7 @@
 
 <img src="assets/icons/icon48.png" width="20" height="20" align="left" alt="" />
 
-AI Safety Guard watches the message box on ChatGPT, Claude, Gemini, Perplexity, and Microsoft Copilot. As you type, it scans your text locally for sensitive information: emails, phone numbers, credit cards, SSNs, API keys, passwords, and confidential business, legal, financial, or health language.
+AI Prompt - Security Guard watches the message box on ChatGPT, Claude, Gemini, Perplexity, and Microsoft Copilot. As you type, it scans your text locally for sensitive information: emails, phone numbers, credit cards, SSNs, API keys, passwords, and confidential business, legal, financial, or health language.
 
 If you try to send something risky, it pauses and shows a clear warning listing what it found, always masked, never the raw secret. You can redact the values, send anyway, or keep editing. Your text never leaves your device.
 
@@ -53,7 +53,7 @@ Everyday AI users, employees using AI at work, students and researchers, freelan
 
 ## Getting started
 
-**Regular install:** add it from the [Chrome Web Store](https://chromewebstore.google.com/detail/ai-safety-guard/ghjnpbnohiidngnjcfkehdnnpbkkhfdp). The setup screen opens on first install — choose your sensitivity and the sites to watch.
+**Regular install:** add it from the [Chrome Web Store](https://chromewebstore.google.com/detail/ai-prompt-security-guard/ghjnpbnohiidngnjcfkehdnnpbkkhfdp). The setup screen opens on first install — choose your sensitivity and the sites to watch.
 
 **From source (development):**
 
@@ -73,7 +73,7 @@ Removing the domain from the popup unregisters the scanner and withdraws the sit
 
 **Fonts look wrong on a site.** Some sites have a strict Content Security Policy. The extension loads its own fonts to work around this; if you see a system font, reload the tab once.
 
-**Badge or warning does not appear.** AI sites change their layout often. Reopen the popup and confirm the site toggle is on. If it still does not appear, check the console for a message starting with `[AI Safety Guard]`.
+**Badge or warning does not appear.** AI sites change their layout often. Reopen the popup and confirm the site toggle is on. If it still does not appear, check the console for a message starting with `[AI Prompt - Security Guard]`.
 
 **Nothing is saved.** Settings live in browser local storage. Locked-down or guest profiles that block extension storage will not persist preferences.
 

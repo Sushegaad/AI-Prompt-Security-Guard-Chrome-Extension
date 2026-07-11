@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Tier A e2e: hermetic composer fixtures (every PR)
+ * AI Prompt - Security Guard — Tier A e2e: hermetic composer fixtures (every PR)
  * ----------------------------------------------------------------------------
  * For each supported site: serve a local snapshot of its composer DOM on the
  * REAL origin (route interception — zero live traffic), type a canary secret,
@@ -27,7 +27,7 @@ for (const site of SITES) {
   const page = await context.newPage();
   const errors = [];
   page.on('console', (msg) => {
-    if (msg.type() === 'error' && msg.text().includes('[AI Safety Guard]')) errors.push(msg.text());
+    if (msg.type() === 'error' && msg.text().includes('[AI Prompt - Security Guard]')) errors.push(msg.text());
   });
 
   try {

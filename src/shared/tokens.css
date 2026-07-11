@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Design Tokens (GENERATED from constants.js — do not edit)
+ * AI Prompt - Security Guard — Design Tokens (GENERATED from constants.js — do not edit)
  * Regenerate with: npm run gen:tokens
  * ==========================================================================*/
 
@@ -46,7 +46,7 @@
 }
 
 /* ============================================================================
- * AI Safety Guard — Token-based component helpers (static, var() only)
+ * AI Prompt - Security Guard — Token-based component helpers (static, var() only)
  * ----------------------------------------------------------------------------
  * This file is concatenated after the generated :root block to produce
  * tokens.css (see scripts/gen-tokens.mjs). It contains NO literal colors —

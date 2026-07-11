@@ -5,7 +5,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /*
- * Build pipeline for AI Safety Guard (MV3).
+ * Build pipeline for AI Prompt - Security Guard (MV3).
  *
  * Entry points are emitted into dist/ mirroring the source tree, so that the
  * relative url() references inside fonts.css (../../assets/fonts/...) and the

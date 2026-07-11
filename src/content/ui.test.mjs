@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Phase 3 UI & adapter tests (jsdom)
+ * AI Prompt - Security Guard — Phase 3 UI & adapter tests (jsdom)
  * Run: node src/content/ui.test.mjs
  * ========================================================================== */
 

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Content Script (orchestration)
+ * AI Prompt - Security Guard — Content Script (orchestration)
  * ----------------------------------------------------------------------------
  * Wires the on-device detector to the UI on supported AI sites:
  *   - resolve the site adapter (DOM selectors)
@@ -376,10 +376,10 @@ function maybeShowCapabilityNotice() {
     title: 'Before you type here',
     subtitle:
       'AI chat sites can send what you type to their servers before you press ' +
-      'send. AI Safety Guard warns you at send time — and Shield Mode (in the ' +
+      'send. AI Prompt - Security Guard warns you at send time — and Shield Mode (in the ' +
       'toolbar popup) lets you type privately, so nothing reaches this site ' +
       'until you approve it.',
-    note: 'You can turn Shield Mode on per site from the AI Safety Guard popup.',
+    note: 'You can turn Shield Mode on per site from the AI Prompt - Security Guard popup.',
   });
   try {
     chrome.runtime.sendMessage({

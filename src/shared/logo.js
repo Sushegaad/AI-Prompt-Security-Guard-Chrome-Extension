@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Logo mark (single source)
+ * AI Prompt - Security Guard — Logo mark (single source)
  * ----------------------------------------------------------------------------
  * A shield (chat-bubble silhouette) with a keyhole inside: protection + privacy.
  * Built from brand tokens so there are no hardcoded colors — the toolbar/store

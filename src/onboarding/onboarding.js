@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — First-Run Onboarding (Screen E)
+ * AI Prompt - Security Guard — First-Run Onboarding (Screen E)
  * ----------------------------------------------------------------------------
  * 3 steps: intro → sensitivity → sites. On "Start protecting me" we persist the
  * chosen settings (via the service worker) with onboardingComplete:true and
@@ -34,7 +34,7 @@ export function initOnboarding(opts = {}) {
   function hero() {
     const mark = el('div.hero__mark');
     mark.style.background = `url("${logoDataUri()}") center / contain no-repeat`;
-    return el('div.hero', {}, [mark, el('div.hero__name', { text: 'AI Safety Guard' })]);
+    return el('div.hero', {}, [mark, el('div.hero__name', { text: 'AI Prompt - Security Guard' })]);
   }
 
   function step1() {

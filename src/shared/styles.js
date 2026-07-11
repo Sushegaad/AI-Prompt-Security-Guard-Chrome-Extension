@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Design-system CSS (single source)
+ * AI Prompt - Security Guard — Design-system CSS (single source)
  * ----------------------------------------------------------------------------
  * One place that turns the JS token values in constants.js into CSS. Two
  * consumers share it, so the tokens and component classes are defined ONCE:
@@ -79,7 +79,7 @@ export function cssVars(selector = ':root', { scrim = false, reset = false } = {
  */
 export function componentCss() {
   return `/* ============================================================================
- * AI Safety Guard — Token-based component helpers (static, var() only)
+ * AI Prompt - Security Guard — Token-based component helpers (static, var() only)
  * ----------------------------------------------------------------------------
  * This file is concatenated after the generated :root block to produce
  * tokens.css (see scripts/gen-tokens.mjs). It contains NO literal colors —

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Phase 4 tests (storage, message router, popup, onboarding)
+ * AI Prompt - Security Guard — Phase 4 tests (storage, message router, popup, onboarding)
  * Run: node src/background/phase4.test.mjs
  * ========================================================================== */
 
@@ -198,7 +198,7 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   const root = document.getElementById('onboarding');
 
   ok('onboarding: step 1 title', root.textContent.includes('A safety net for AI'));
-  ok('onboarding: step 1 branded hero + wordmark', !!root.querySelector('.hero') && root.querySelector('.hero__name').textContent === 'AI Safety Guard');
+  ok('onboarding: step 1 branded hero + wordmark', !!root.querySelector('.hero') && root.querySelector('.hero__name').textContent === 'AI Prompt - Security Guard');
   ok('onboarding: step 1 intro line', root.textContent.includes('before private info leaves'));
   ok('onboarding: step 1 has 3 benefits', root.querySelectorAll('.benefit').length === 3);
 

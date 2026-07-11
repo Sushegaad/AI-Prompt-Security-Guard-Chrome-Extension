@@ -1,4 +1,4 @@
-# AI Safety Guard — Federal Security Overview
+# AI Prompt - Security Guard — Federal Security Overview
 
 One-page summary for agency security reviewers (ISSO / Authorizing Official). Version 1.0.0, July 2026 build.
 
@@ -8,7 +8,7 @@ A free, open-source Chrome extension (Manifest V3) that warns a user before they
 
 ## Why the FedRAMP question usually does not apply
 
-FedRAMP authorizes cloud service offerings that store, process, or transmit federal data on a vendor-operated backend. AI Safety Guard has no backend, no server, no account system, and makes no network calls with user content. There is no cloud system to place inside an authorization boundary. The extension runs entirely within the agency's own managed browser, so the relevant path is the agency's standard endpoint software review and ATO under FISMA / NIST SP 800-53, not a FedRAMP package. If a hosted component is ever added, that calculus changes and FedRAMP (likely the Low or LI-SaaS baseline) would re-enter scope.
+FedRAMP authorizes cloud service offerings that store, process, or transmit federal data on a vendor-operated backend. AI Prompt - Security Guard has no backend, no server, no account system, and makes no network calls with user content. There is no cloud system to place inside an authorization boundary. The extension runs entirely within the agency's own managed browser, so the relevant path is the agency's standard endpoint software review and ATO under FISMA / NIST SP 800-53, not a FedRAMP package. If a hosted component is ever added, that calculus changes and FedRAMP (likely the Low or LI-SaaS baseline) would re-enter scope.
 
 ## Data flow and the no-egress guarantee
 

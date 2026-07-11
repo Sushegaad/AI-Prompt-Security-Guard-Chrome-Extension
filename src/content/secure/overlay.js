@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Shield Mode overlay (content-script side)
+ * AI Prompt - Security Guard — Shield Mode overlay (content-script side)
  * ----------------------------------------------------------------------------
  * When Shield Mode is ON for a site, this positions an extension-origin iframe
  * (the secure composer) directly over the provider's real composer. The user
@@ -84,7 +84,7 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
     const s = settingsRef().sensitivity || 'balanced';
     frame = document.createElement('iframe');
     frame.id = IFRAME_ID;
-    frame.setAttribute('title', 'AI Safety Guard secure composer');
+    frame.setAttribute('title', 'AI Prompt - Security Guard secure composer');
     frame.setAttribute('allow', ''); // no powerful features
     frame.src = chrome.runtime.getURL(
       `src/secure-composer/secure-composer.html?n=${nonce}&s=${encodeURIComponent(s)}&m=${encodeURIComponent(muted)}`

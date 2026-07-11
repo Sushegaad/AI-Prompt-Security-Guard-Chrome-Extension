@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Offscreen document (PDF parser host)
+ * AI Prompt - Security Guard — Offscreen document (PDF parser host)
  * ----------------------------------------------------------------------------
  * Runs pdf.js (and its worker) on the extension's own origin, isolated from any
  * host page. The service worker creates this document on demand and relays PDF

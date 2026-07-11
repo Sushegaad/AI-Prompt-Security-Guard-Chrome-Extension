@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — PDF text extraction (runs in the OFFSCREEN document)
+ * AI Prompt - Security Guard — PDF text extraction (runs in the OFFSCREEN document)
  * ----------------------------------------------------------------------------
  * pdf.js needs a worker and a DOM, which makes a content script the wrong host.
  * This module is bundled into the offscreen document instead, where pdf.js and

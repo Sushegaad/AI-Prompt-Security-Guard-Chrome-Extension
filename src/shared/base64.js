@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — base64 helpers for transferring file bytes between contexts
+ * AI Prompt - Security Guard — base64 helpers for transferring file bytes between contexts
  * ----------------------------------------------------------------------------
  * chrome.runtime messages are JSON-serializable only, so PDF bytes are passed
  * from the content script to the offscreen document (via the service worker) as

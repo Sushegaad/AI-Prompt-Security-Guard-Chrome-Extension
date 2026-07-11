@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — Tier B e2e: live-site drift probe (weekly, advisory)
+ * AI Prompt - Security Guard — Tier B e2e: live-site drift probe (weekly, advisory)
  * ----------------------------------------------------------------------------
  * Visits the five real sites LOGGED OUT and reports, per site:
  *

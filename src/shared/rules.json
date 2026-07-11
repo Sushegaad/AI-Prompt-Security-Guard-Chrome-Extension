@@ -1,5 +1,5 @@
 {
-  "_comment": "AI Safety Guard — detection keyword & prefix data. Regex patterns live in detector.js; this file holds the editable word lists and token prefixes. Keep entries lowercase unless case is significant (API key prefixes are case-sensitive). Lists include French/German/Spanish phrases (EU coverage) — new entries in any language must be distinctive multi-word phrases or unambiguous single words, never short generic terms.",
+  "_comment": "AI Prompt - Security Guard — detection keyword & prefix data. Regex patterns live in detector.js; this file holds the editable word lists and token prefixes. Keep entries lowercase unless case is significant (API key prefixes are case-sensitive). Lists include French/German/Spanish phrases (EU coverage) — new entries in any language must be distinctive multi-word phrases or unambiguous single words, never short generic terms.",
 
   "apiKeyPrefixes": [
     "sk-live-", "sk-test-", "sk-proj-", "sk-", "pk-live-", "pk-test-", "rk-live-",

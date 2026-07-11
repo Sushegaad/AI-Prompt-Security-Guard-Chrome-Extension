@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — tiny hyperscript helper (single shared implementation)
+ * AI Prompt - Security Guard — tiny hyperscript helper (single shared implementation)
  * ----------------------------------------------------------------------------
  * h('button.asg-btn', { onclick }, 'Label') -> HTMLButtonElement
  * Tag may include .class tokens. Text children are added as text nodes, so user

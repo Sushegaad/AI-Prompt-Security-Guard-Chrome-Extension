@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — generate toolbar/store icon PNGs from the logo mark
+ * AI Prompt - Security Guard — generate toolbar/store icon PNGs from the logo mark
  * Run: npm run gen:icons
  *
  * Writes the single-source SVG (shared/logo.js) to a temp file and rasterizes

@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — gated diagnostic logging
+ * AI Prompt - Security Guard — gated diagnostic logging
  * ----------------------------------------------------------------------------
  * Diagnostics (startup, attach, "input not found", selector fallbacks) are
  * helpful while developing but should be silent in the shipped extension so we
@@ -10,7 +10,7 @@
  * ========================================================================== */
 
 const DEBUG = false;
-const PREFIX = '[AI Safety Guard]';
+const PREFIX = '[AI Prompt - Security Guard]';
 
 export const log = {
   debug: (...args) => {

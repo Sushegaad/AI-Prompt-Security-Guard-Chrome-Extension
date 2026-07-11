@@ -1,5 +1,5 @@
 /* ============================================================================
- * AI Safety Guard — debounce
+ * AI Prompt - Security Guard — debounce
  * ----------------------------------------------------------------------------
  * The inline badge (A1, Phase 3) scans on input but must NEVER scan on every
  * keystroke. Wrap the scan in debounce(fn, 300) so it runs at most once per
