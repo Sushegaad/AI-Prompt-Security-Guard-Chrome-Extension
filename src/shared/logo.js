@@ -1,21 +1,35 @@
 /* ============================================================================
  * AI Prompt - Security Guard — Logo mark (single source)
  * ----------------------------------------------------------------------------
- * A shield (chat-bubble silhouette) with a keyhole inside: protection + privacy.
+ * A shield built from a chat bubble: protection meets conversation. The notch
+ * at the base reads as a speech tail; the keyhole inside signals privacy.
  * Built from brand tokens so there are no hardcoded colors — the toolbar/store
  * icons (rendered to PNG) and the in-UI wordmark all come from this one mark.
+ * Spec: Plans/AI Prompt - Security Guard Logo.pdf (200-unit grid, 12% inset).
  * ========================================================================== */
 
 import { BRAND } from './constants.js';
 
-/** The shield+keyhole mark as an SVG string (64x64 viewBox, transparent bg). */
-export function logoSvg() {
+/**
+ * The bubble-shield + keyhole mark as an SVG string (64x64 viewBox,
+ * transparent bg). Two facets (light left / trust right) split on the axis.
+ *
+ * @param {object} [opts]
+ * @param {boolean} [opts.simple] At tiny sizes (16px toolbar icon) the keyhole
+ *   simplifies to a solid dot — the shield silhouette still reads.
+ */
+export function logoSvg({ simple = false } = {}) {
+  const keyhole = simple
+    ? `<circle cx="32" cy="29" r="7.5" fill="${BRAND.onTrust}"/>`
+    : `<circle cx="32" cy="26" r="6.2" fill="${BRAND.onTrust}"/>` +
+      `<path d="M29.3 29.5 L34.7 29.5 L36.6 42 L27.4 42 Z" fill="${BRAND.onTrust}"/>`;
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
-    `<path d="M32 8 L18.6 12.8 C17.7 13.1 17.1 13.9 17.1 14.9 L17.1 30.4 C17.1 41.3 23.4 49 32 53.6 Z" fill="${BRAND.trustLight}"/>` +
-    `<path d="M32 8 L45.4 12.8 C46.3 13.1 46.9 13.9 46.9 14.9 L46.9 30.4 C46.9 41.3 40.6 49 32 53.6 Z" fill="${BRAND.trust}"/>` +
-    `<circle cx="32" cy="25.5" r="5.2" fill="${BRAND.onTrust}"/>` +
-    `<path d="M29.6 27.5 L34.4 27.5 L35.9 40 L28.1 40 Z" fill="${BRAND.onTrust}"/>` +
+    // chat-bubble shield, left facet (the bottom point doubles as the speech tail)
+    `<path d="M32 6 L17 6 Q11 6 11 12 L11 31 Q11 42.5 21 48.5 L32 57 Z" fill="${BRAND.trustLight}"/>` +
+    // right facet
+    `<path d="M32 6 L47 6 Q53 6 53 12 L53 31 Q53 42.5 43 48.5 L32 57 Z" fill="${BRAND.trust}"/>` +
+    keyhole +
     '</svg>'
   );
 }

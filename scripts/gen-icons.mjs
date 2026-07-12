@@ -22,10 +22,12 @@ const SIZES = [16, 48, 128];
 const tmp = mkdtempSync(join(tmpdir(), 'asg-logo-'));
 const svgPath = join(tmp, 'logo.svg');
 writeFileSync(svgPath, logoSvg());
+const svgSimplePath = join(tmp, 'logo-simple.svg');
+writeFileSync(svgSimplePath, logoSvg({ simple: true }));
 
 const py = SIZES.map(
   (s) =>
-    `cairosvg.svg2png(url=${JSON.stringify(svgPath)}, write_to=${JSON.stringify(
+    `cairosvg.svg2png(url=${JSON.stringify(s <= 16 ? svgSimplePath : svgPath)}, write_to=${JSON.stringify(
       join(ICONS, `icon${s}.png`)
     )}, output_width=${s}, output_height=${s})`
 ).join('; ');
