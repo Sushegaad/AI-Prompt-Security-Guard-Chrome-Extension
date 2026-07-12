@@ -11,6 +11,24 @@ store reviewers can see exactly what changed and why.
   docs, site copy and package name. Internal `asg-`/`.asg` prefixes and
   element ids unchanged (not user-facing; avoids breaking selectors/tests).
 
+### Internals & security hygiene
+- Privacy audit rewritten to match reality: stale "cloud rewrite" spec text
+  removed; Shield's approved-text relay is now an EXPLICIT audited exception —
+  new checks confine `SHIELD_SUBMIT`/`SHIELD_INJECT` to the four relay files
+  and assert nonce-tagging at the sender and the SW relay.
+- CI gains a production-dependency vulnerability gate
+  (`npm audit --omit=dev --audit-level=high`).
+- Category metadata single-sourced in `src/shared/categories.js`;
+  `UNMUTABLE_CATEGORIES` is now derived from the `risk:'critical'` entries
+  (DRY by construction; the retune test snapshots the expected set).
+- Settings reads simplified: contexts read `chrome.storage` natively via
+  `readSettings()` and subscribe with `storage.onChanged`. `GET_SETTINGS`,
+  `SETTINGS_UPDATED` and the all-tabs broadcast are gone; writes still route
+  through the SW's `sanitizePatch` boundary. Late-loading tabs can no longer
+  miss a settings update.
+- The marketing site self-hosts its fonts (was Google Fonts) — no third-party
+  requests from the site, matching the product's privacy posture.
+
 ### Brand & site
 - New logo mark: a shield built from a chat bubble with a keyhole (spec in
   `Plans/AI Prompt - Security Guard Logo.pdf`). Single source in

@@ -74,14 +74,15 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
     readSettings: () => readSettings(area),
     writeSettings: (p) => writeSettings(p, area),
     recordCatch: (f) => recordCatch(f, area),
-    broadcast: () => (deps._broadcasts = (deps._broadcasts || 0) + 1),
   };
-  const got = await routeMessage({ type: MSG.GET_SETTINGS }, deps);
-  ok('router GET_SETTINGS returns settings', got.sensitivity === 'balanced');
+  // Settings reads no longer route through messages (native readSettings +
+  // storage.onChanged); the router only handles writes.
+  const got = await routeMessage({ type: 'GET_SETTINGS' }, deps);
+  ok('router rejects retired GET_SETTINGS as unknown', got && got.error === 'unknown_message');
 
   const set = await routeMessage({ type: MSG.SET_SETTINGS, patch: { sensitivity: 'basic' } }, deps);
   ok('router SET_SETTINGS writes', set.sensitivity === 'basic');
-  ok('router SET_SETTINGS broadcasts', deps._broadcasts === 1);
+  ok('router SET_SETTINGS returns fresh settings', set.riskySubmissionsCaught === 0);
 
   const caught = await routeMessage({ type: MSG.RECORD_CATCH }, deps);
   ok('router RECORD_CATCH increments', caught.riskySubmissionsCaught === 1);
@@ -142,13 +143,12 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   const settings = withDefaults({ riskySubmissionsCaught: 142 });
   const send = async (m) => {
     sent.push(m);
-    if (m.type === MSG.GET_SETTINGS) return settings;
     if (m.type === MSG.SET_SETTINGS) return withDefaults({ ...settings, ...m.patch });
     return { ok: true };
   };
 
   const { initPopup } = await import('../popup/popup.js');
-  const popup = initPopup({ doc: document, send });
+  const popup = initPopup({ doc: document, send, load: async () => settings });
   await tick();
 
   const body = document.getElementById('popup-body');

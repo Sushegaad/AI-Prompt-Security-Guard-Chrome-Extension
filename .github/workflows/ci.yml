@@ -33,6 +33,9 @@ jobs:
       - name: Privacy audit
         run: npm run audit:privacy
 
+      - name: Dependency vulnerability audit (production deps)
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Performance benchmark
         run: npm run bench
 

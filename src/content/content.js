@@ -26,7 +26,7 @@ import { bytesToBase64 } from '../shared/base64.js';
 import { log } from '../shared/log.js';
 import { debounce } from '../shared/debounce.js';
 import { shouldInterrupt } from '../shared/constants.js';
-import { MSG, withDefaults } from '../shared/storage.js';
+import { MSG, withDefaults, readSettings } from '../shared/storage.js';
 
 const settings = withDefaults({});
 
@@ -67,20 +67,27 @@ function consumeSuppression() {
 }
 
 /* ------------------------------- settings -------------------------------- */
-// The service worker owns storage; content scripts ask for settings by message.
+// The service worker owns storage WRITES (sanitizePatch is the boundary);
+// reads are native — chrome.storage is directly readable here, and
+// storage.onChanged replaces the old SW broadcast (no message round-trip,
+// and a late-loading tab can never miss an update).
 async function loadSettings() {
   try {
-    const s = await chrome.runtime.sendMessage({ type: MSG.GET_SETTINGS });
-    if (s && typeof s === 'object' && !s.error) Object.assign(settings, withDefaults(s));
+    Object.assign(settings, await readSettings());
   } catch {
     /* defaults stand */
   }
 }
 try {
-  chrome.runtime.onMessage.addListener((msg) => {
-    if (msg && msg.type === MSG.SETTINGS_UPDATED && msg.settings) {
-      Object.assign(settings, withDefaults(msg.settings));
-    }
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return;
+    loadSettings().then(() => {
+      try {
+        runScan(); // apply new sensitivity/mutes/site toggles to the badge now
+      } catch {
+        /* ignore */
+      }
+    });
   });
 } catch {
   /* no chrome in some contexts */
@@ -204,8 +211,8 @@ function openModal(result, text) {
           /* ignore */
         }
       },
-      // "Don't warn me about X" — the SW validates, persists, and broadcasts;
-      // our SETTINGS_UPDATED listener refreshes local state automatically.
+      // "Don't warn me about X" — the SW validates and persists; our
+      // storage.onChanged listener refreshes local state automatically.
       mute: (category) => {
         try {
           chrome.runtime.sendMessage({ type: MSG.MUTE_CATEGORY, category });

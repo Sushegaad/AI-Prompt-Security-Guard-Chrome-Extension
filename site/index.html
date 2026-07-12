@@ -17,10 +17,14 @@
   <meta property="og:title" content="AI Prompt - Security Guard" />
   <meta property="og:description" content="Stop accidentally sending secrets to AI chatbots. Local scanning, pre-send warnings, one-click redaction." />
   <meta property="og:image" content="assets/logo-mark.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700;800&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
+    /* Self-hosted fonts (same woff2 files the extension bundles) — the site
+       makes no third-party requests, matching the product's privacy posture.
+       700/800 heading weights are browser-synthesized from the 500 face. */
+    @font-face { font-family: "Hanken Grotesk"; font-weight: 400; font-display: swap; src: url("assets/fonts/hanken-grotesk-400.woff2") format("woff2"); }
+    @font-face { font-family: "Hanken Grotesk"; font-weight: 500 800; font-display: swap; src: url("assets/fonts/hanken-grotesk-500.woff2") format("woff2"); }
+    @font-face { font-family: "Spline Sans Mono"; font-weight: 400; font-display: swap; src: url("assets/fonts/spline-sans-mono-400.woff2") format("woff2"); }
+    @font-face { font-family: "Spline Sans Mono"; font-weight: 500; font-display: swap; src: url("assets/fonts/spline-sans-mono-500.woff2") format("woff2"); }
     :root {
       --trust: #3B5BDB; --trust-hover: #2F4BC4; --trust-light: #5E73E6; --trust-soft: #EAEDFB;
       --ink: #1A1A2E; --muted: #5A5A6E; --paper: #F8F7F4; --surface: #FFFFFF; --border: #E3E1DB;
@@ -164,7 +168,9 @@
     @media (max-width: 820px) { .bonus { grid-template-columns: 1fr; } }
     .bonus h2 { font-size: clamp(24px, 3vw, 32px); font-weight: 800; margin-bottom: 12px; }
     .bonus p { color: var(--muted); margin-bottom: 20px; }
-    .bonus__preview { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 240px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+    .bonus__preview { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; display: flex; align-items: center; justify-content: center; }
+    /* The whole poster stays visible — height capped to the viewport, never cropped or scrolled. */
+    .bonus__preview img { display: block; max-width: 100%; max-height: 86vh; width: auto; height: auto; border-radius: 4px; }
 
     /* final cta */
     .final { text-align: center; }
@@ -418,7 +424,9 @@
             <a class="btn btn--ghost" href="assets/AI-Safety-Best-Practices.pdf" target="_blank" rel="noopener">Open in a new tab</a>
           </div>
         </div>
-        <div class="bonus__preview">[ best-practices poster preview ]</div>
+        <a class="bonus__preview" href="assets/AI-Safety-Best-Practices.pdf" target="_blank" rel="noopener" aria-label="Open the best-practices poster PDF">
+          <img src="assets/best-practices-poster.png" alt="Poster: What you should never type into an AI chatbot — five categories to keep to yourself, smart habits, and the golden rule." loading="lazy" width="760" height="1182" />
+        </a>
       </div>
     </div>
   </section>

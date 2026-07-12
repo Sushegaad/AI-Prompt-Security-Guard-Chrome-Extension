@@ -32,43 +32,11 @@ const now =
     ? () => performance.now()
     : () => Date.now();
 
-/* --- Category metadata -----------------------------------------------------
- * type        → human label shown in the A2 modal row
- * summary     → lowercase form used in the badge/summary line
- * redactLabel → the [LABEL] chip used by B1 redaction
- * risk        → severity id from constants.RISK
- * ------------------------------------------------------------------------- */
-export const CATEGORY = {
-  api_key:        { type: 'API key',          summary: 'API key',           redactLabel: '[API_KEY]', risk: 'critical' },
-  password:       { type: 'Password',         summary: 'password',          redactLabel: '[SECRET]',  risk: 'critical' },
-  connection_string:{ type: 'Database URL',   summary: 'database URL',      redactLabel: '[DB_URL]',  risk: 'critical' },
-  private_key:    { type: 'Private key (PEM)', summary: 'private key',      redactLabel: '[PRIVATE_KEY]', risk: 'critical' },
-  iban:           { type: 'IBAN',             summary: 'IBAN',              redactLabel: '[IBAN]',    risk: 'critical' },
-  credit_card:    { type: 'Credit card',      summary: 'credit card',       redactLabel: '[CARD]',    risk: 'critical' },
-  ssn:            { type: 'SSN',              summary: 'SSN',               redactLabel: '[SSN]',     risk: 'critical' },
-  account_number: { type: 'Account number',   summary: 'account number',    redactLabel: '[ACCOUNT]', risk: 'high' },
-  health:         { type: 'Health info',      summary: 'health information', redactLabel: '[HEALTH]',  risk: 'high' },
-  financial:      { type: 'Financial data',   summary: 'financial data',    redactLabel: '[FINANCIAL]', risk: 'high' },
-  legal:          { type: 'Legal language',   summary: 'legal language',    redactLabel: '[LEGAL]',   risk: 'high' },
-  customer_data:  { type: 'Customer name',    summary: 'customer data',     redactLabel: '[NAME]',    risk: 'high' },
-  internal_url:   { type: 'Internal URL',     summary: 'internal URL',      redactLabel: '[URL]',     risk: 'high' },
-  email:          { type: 'Email address',    summary: 'email address',     redactLabel: '[EMAIL]',   risk: 'medium' },
-  phone:          { type: 'Phone number',     summary: 'phone number',      redactLabel: '[PHONE]',   risk: 'medium' },
-  address:        { type: 'Physical address', summary: 'physical address',  redactLabel: '[ADDRESS]', risk: 'medium' },
-  // interrupt:false — code alone is context, not a leak (secrets INSIDE code are
-  // caught by their own categories). Badge-only in every mode.
-  source_code:    { type: 'Source code',      summary: 'source code',       redactLabel: '[CODE]',    risk: 'medium', interrupt: false },
-  gov_id:          { type: 'Government ID',        summary: 'government ID',         redactLabel: '[GOV_ID]',    risk: 'critical' },
-  education:       { type: 'Education record',     summary: 'education record',      redactLabel: '[EDU]',       risk: 'high' },
-  workplace:       { type: 'Workplace/HR data',    summary: 'workplace data',        redactLabel: '[HR]',        risk: 'high' },
-  special_category:{ type: 'Special-category data', summary: 'special-category data', redactLabel: '[SENSITIVE]', risk: 'high' },
-  regulated:       { type: 'Regulated-data signal', summary: 'regulated-data signal', redactLabel: '[REGULATED]', risk: 'high' },
-  restriction:     { type: 'Restriction notice',   summary: 'restriction notice',    redactLabel: '[RESTRICTED]', risk: 'high' },
-  company_secret:  { type: 'Company secret',       summary: 'company secret',        redactLabel: '[INTERNAL]',  risk: 'high' },
-  children:        { type: "Children's data",      summary: "children's data",       redactLabel: '[MINOR]',     risk: 'high' },
-  location:        { type: 'Location/tracking',    summary: 'location data',         redactLabel: '[LOCATION]',  risk: 'high' },
-  file_path:       { type: 'File path',            summary: 'file path',             redactLabel: '[PATH]',      risk: 'medium' },
-};
+/* --- Category metadata lives in shared/categories.js (single source for
+ * labels, risk levels, redaction labels, interrupt flags — and the derived
+ * UNMUTABLE_CATEGORIES). Re-exported here so detector consumers keep one import. */
+export { CATEGORY } from '../shared/categories.js';
+import { CATEGORY } from '../shared/categories.js';
 
 /* ============================================================================
  * Helpers — entropy, Luhn, masking

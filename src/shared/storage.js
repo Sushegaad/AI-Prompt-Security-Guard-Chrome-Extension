@@ -4,9 +4,11 @@
  * Single source of truth for the settings schema and the message types used
  * between content scripts / popup / onboarding and the service worker.
  *
- * The SERVICE WORKER owns all chrome.storage reads/writes (the read/write
- * helpers below run there). MV3 service workers are ephemeral, so every handler
- * reads from storage fresh — never from memory.
+ * The SERVICE WORKER owns all chrome.storage WRITES (sanitizePatch below is
+ * the security boundary for SET_SETTINGS). READS are native: any context may
+ * call readSettings() against chrome.storage.local and subscribe with
+ * chrome.storage.onChanged — no read messages, no broadcast fan-out. MV3
+ * service workers are ephemeral, so every handler reads storage fresh.
  * ========================================================================== */
 
 import { DEFAULT_SENSITIVITY, SENSITIVITY } from './constants.js';
@@ -58,21 +60,14 @@ export function shouldShowNoiseHint(settings) {
   return total >= 20 && (o.sentAnyway || 0) / total > 0.6;
 }
 
-/**
- * Categories that can never be muted: critical secrets where a single miss is
- * catastrophic. Keep in sync with the risk:'critical' entries in detector.js
- * CATEGORY (listed here so the service worker doesn't import the engine).
- */
-export const UNMUTABLE_CATEGORIES = Object.freeze([
-  'api_key', 'password', 'connection_string', 'private_key', 'iban',
-  'credit_card', 'ssn', 'gov_id',
-]);
+// Critical secret categories can never be muted. DERIVED from the category
+// metadata (shared/categories.js) — no duplicated list to drift.
+export { UNMUTABLE_CATEGORIES } from './categories.js';
+import { UNMUTABLE_CATEGORIES } from './categories.js';
 
 /** Message types exchanged with the service worker. */
 export const MSG = Object.freeze({
-  GET_SETTINGS: 'GET_SETTINGS',
-  SET_SETTINGS: 'SET_SETTINGS',
-  SETTINGS_UPDATED: 'SETTINGS_UPDATED',
+  SET_SETTINGS: 'SET_SETTINGS', // writes only — reads use readSettings() + storage.onChanged
   RECORD_CATCH: 'RECORD_CATCH',
   RECORD_OUTCOME: 'RECORD_OUTCOME', // { action: 'redacted'|'sentAnyway'|'edited' }
   MUTE_CATEGORY: 'MUTE_CATEGORY', // { category } — adds to disabledCategories

@@ -5,7 +5,7 @@
  * persists every change immediately (no Save button) via SET_SETTINGS.
  * ========================================================================== */
 
-import { MSG, withDefaults, shouldShowNoiseHint } from '../shared/storage.js';
+import { MSG, withDefaults, shouldShowNoiseHint, readSettings } from '../shared/storage.js';
 import { SENSITIVITY } from '../shared/constants.js';
 import { CATEGORY } from '../content/detector.js';
 import { normalizeHostname, originFor } from '../shared/domains.js';
@@ -19,6 +19,9 @@ const POPUP_SITES = SITES.filter((s) => s.inPopup).map((s) => ({ id: s.id, label
 export function initPopup(opts = {}) {
   const doc = opts.doc || document;
   const send = opts.send || ((m) => chrome.runtime.sendMessage(m));
+  // Reads are native (extension pages can read chrome.storage directly);
+  // writes still go through the SW's SET_SETTINGS sanitize boundary.
+  const load = opts.load || (() => readSettings());
   const body = doc.getElementById('popup-body');
   let settings = withDefaults({});
 
@@ -294,7 +297,7 @@ export function initPopup(opts = {}) {
   }
 
   // Load current settings, then render.
-  Promise.resolve(send({ type: MSG.GET_SETTINGS }))
+  Promise.resolve(load())
     .then((s) => {
       if (s && typeof s === 'object' && !s.error) settings = withDefaults(s);
     })

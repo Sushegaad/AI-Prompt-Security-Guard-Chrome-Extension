@@ -3,11 +3,16 @@
  * Run: npm run audit:privacy   (node scripts/privacy-audit.mjs)
  *
  * Enforces the product's core privacy promises by scanning the source tree:
- *   1. The ONLY network egress is the B2 cloud rewrite (rewriter.js). Fonts are
- *      fetched from the extension's own origin (local resource), not the network.
- *   2. The rewrite call is consent-gated (never invoked before allowRewrite).
- *   3. chrome.storage is written only via storage.js, and only the settings
- *      schema + counter — never prompt text.
+ *   1. There is NO cloud feature and NO network egress of user content. The
+ *      only network API in the codebase is the font loader fetching the
+ *      extension's OWN bundled woff2 (extension origin, never the internet).
+ *   2. chrome.storage is written only via storage.js, and only the settings
+ *      schema + counters — never prompt text or raw detected values.
+ *   3. No internal message carries prompt/raw text, with ONE audited
+ *      exception: Shield Mode's user-APPROVED text (SHIELD_SUBMIT from the
+ *      secure-composer iframe, relayed as SHIELD_INJECT by the service
+ *      worker). Both are on-device extension-to-extension messages, must be
+ *      nonce-tagged, and may appear nowhere else.
  *   4. No analytics/beacon/websocket channels exist that could carry prompt text.
  *
  * Exits non-zero on any violation so it can run in CI / the build.
@@ -84,16 +89,50 @@ const hasCounterOnly = /riskySubmissionsCaught/.test(schemaKeys) && !FORBIDDEN_K
 note('settings schema = preferences + counter only', hasCounterOnly);
 
 /* 4. No message ever carries prompt text ----------------------------------- */
-// With no cloud feature, prompt/raw text must NEVER appear in any message.
+// With no cloud feature, prompt/raw text must NEVER appear in any message —
+// with one explicit, audited exception: Shield Mode's user-APPROVED text.
+// SHIELD_SUBMIT (secure-composer → SW) and its SHIELD_INJECT relay (SW →
+// content script) legitimately carry a `text:` field. They are confined to
+// the two files below and every such call must carry the per-session nonce.
+// Any OTHER message with a text-like field is a violation.
 const promptMsgViolations = [];
 for (const f of files.filter((x) => !isTest(x))) {
   const src = code(f);
-  const calls = src.match(/sendMessage\(\s*\{[\s\S]*?\}\s*\)/g) || [];
+  const calls = src.match(/sendMessage\(\s*[^)]*?\{[\s\S]*?\}\s*\)/g) || [];
   for (const call of calls) {
-    if (/\b(prompt|rawValue|inputText)\b/.test(call)) promptMsgViolations.push(rel(f));
+    if (/\b(prompt|promptText|rawValue|inputText|messageText)\b/.test(call)) {
+      promptMsgViolations.push(rel(f));
+    }
   }
 }
-note('no message payload carries prompt/raw text', promptMsgViolations.length === 0, promptMsgViolations.join(', '));
+note('no message payload carries prompt/raw-text fields', promptMsgViolations.length === 0, promptMsgViolations.join(', '));
+
+// The approved-text relay pair (SHIELD_SUBMIT / SHIELD_INJECT) is the ONE
+// place a `text` field may travel in a message. Confine those message types
+// to the four files that implement the relay, and require the nonce at both
+// the sender (secure-composer post()) and the SW relay construction.
+const SHIELD_FILES_ALLOWED = [
+  'src/shared/storage.js', // protocol definition
+  'src/secure-composer/secure-composer.js', // sender
+  'src/background/service-worker.js', // relay
+  'src/content/secure/overlay.js', // receiver
+];
+const shieldMentions = files
+  .filter((f) => !isTest(f) && /SHIELD_(SUBMIT|INJECT)/.test(code(f)))
+  .map(rel)
+  .filter((f) => !SHIELD_FILES_ALLOWED.includes(f));
+note('SHIELD approved-text message types confined to the relay pair', shieldMentions.length === 0, shieldMentions.join(', '));
+
+const scSrc = code(join(SRC, 'secure-composer/secure-composer.js'));
+const swSrc = code(join(SRC, 'background/service-worker.js'));
+note(
+  'shield sender always nonce-tags its messages',
+  /sendMessage\(\s*\{\s*type,\s*nonce:\s*NONCE/.test(scSrc)
+);
+note(
+  'SW relay preserves the nonce on SHIELD_INJECT',
+  /SHIELD_INJECT[\s\S]{0,200}?nonce:\s*msg\.nonce/.test(swSrc)
+);
 
 // No third-party analytics endpoints embedded.
 const ANALYTICS = /(google-analytics|googletagmanager|segment\.io|mixpanel|amplitude|sentry|bugsnag)/i;

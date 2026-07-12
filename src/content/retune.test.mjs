@@ -120,9 +120,12 @@ ok('weak + identifier: risk is high', detect('order #12345 for jane@x.com').risk
   ok('filter: all muted -> safe', all.riskLevel === 'safe' && all.matches.length === 0);
 }
 // storage guards
-ok('unmutable list covers exactly the critical secret categories',
+// UNMUTABLE_CATEGORIES is now DERIVED from CATEGORY (shared/categories.js),
+// so instead of comparing the two (tautology), snapshot the expected set —
+// this catches an accidental risk-level edit silently changing mutability.
+ok('critical secret set (= unmutable) is exactly the expected eight',
   JSON.stringify([...UNMUTABLE_CATEGORIES].sort()) ===
-  JSON.stringify(Object.keys(CATEGORY).filter((k) => CATEGORY[k].risk === 'critical').sort()));
+  JSON.stringify(['api_key', 'connection_string', 'credit_card', 'gov_id', 'iban', 'password', 'private_key', 'ssn']));
 {
   const dirty = sanitizePatch({ disabledCategories: ['email', 'ssn', 'api_key', 'phone'] });
   ok('sanitize: strips unmutable categories', JSON.stringify(dirty.disabledCategories) === JSON.stringify(['email', 'phone']));

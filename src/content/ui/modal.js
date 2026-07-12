@@ -167,7 +167,7 @@ export function createModal(doc = document) {
 
   /* --------------------------- mute a category --------------------------- */
   function handleMute(category) {
-    ctx.services.mute(category); // SW persists + broadcasts; local UI updates now
+    ctx.services.mute(category); // SW persists; storage.onChanged refreshes state; local UI updates now
     ctx.result = {
       ...ctx.result,
       matches: ctx.result.matches.filter((m) => m.category !== category),

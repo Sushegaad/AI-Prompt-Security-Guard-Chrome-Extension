@@ -193,7 +193,6 @@ function makeStorageArea(initial = {}) {
     readSettings: () => readSettings(area),
     writeSettings: (p) => writeSettings(p, area),
     bumpCatch: () => bumpCatch(area),
-    broadcast: async () => {},
     reconcile: async () => {
       reconciled++;
     },

@@ -96,21 +96,6 @@ export async function reconcileCustomDomains(deps = {}) {
   return { registered: toRegister, unregistered: toUnregister, revoked: toRevoke };
 }
 
-/* --- Broadcast settings to every content script -------------------------- */
-async function broadcastSettings(settings) {
-  let tabs;
-  try {
-    tabs = await chrome.tabs.query({});
-  } catch {
-    return;
-  }
-  for (const tab of tabs) {
-    if (!tab.id) continue;
-    // Tabs without our content script will reject — ignore those.
-    chrome.tabs.sendMessage(tab.id, { type: MSG.SETTINGS_UPDATED, settings }).catch(() => {});
-  }
-}
-
 /* --- Offscreen document: hosts pdf.js to parse PDFs locally --------------- */
 const OFFSCREEN_URL = 'src/offscreen/offscreen.html';
 const OFFSCREEN_PDF = 'ASG_OFFSCREEN_PDF';
@@ -165,13 +150,12 @@ async function extractPdfViaOffscreen(dataB64) {
  * helpers and returns the response object to send back.
  */
 export async function routeMessage(msg, deps = {}) {
-  const read = deps.readSettings || readSettings;
   const write = deps.writeSettings || writeSettings;
-  const broadcast = deps.broadcast || broadcastSettings;
 
   switch (msg && msg.type) {
-    case MSG.GET_SETTINGS:
-      return read();
+    // Settings READS need no message: every context uses readSettings()
+    // directly and subscribes via chrome.storage.onChanged. Only writes are
+    // routed here, so sanitizePatch stays the single security boundary.
     case MSG.SET_SETTINGS: {
       const settings = await write(msg.patch || {});
       // Keep dynamic registrations in step when customDomains change.
@@ -183,7 +167,6 @@ export async function routeMessage(msg, deps = {}) {
           /* reconciliation is self-healing on next startup */
         }
       }
-      await broadcast(settings);
       return settings;
     }
     case MSG.RECORD_CATCH: {
@@ -199,9 +182,7 @@ export async function routeMessage(msg, deps = {}) {
     }
     case MSG.MUTE_CATEGORY: {
       const mute = deps.muteCategory || muteCategory;
-      const settings = await mute(msg.category);
-      await broadcast(settings);
-      return settings;
+      return mute(msg.category);
     }
     case MSG.EXTRACT_PDF: {
       const extract = deps.extractPdf || extractPdfViaOffscreen;
