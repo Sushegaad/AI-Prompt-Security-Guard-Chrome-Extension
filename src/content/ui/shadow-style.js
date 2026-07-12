@@ -88,6 +88,19 @@ function shadowOnlyCss() {
 .asg-btn--ghost { width: auto; padding: 8px; }
 .asg-btn--link { width: auto; padding: 8px; }
 
+/* ---- Shield Mode chip: the deliberate, always-visible way in ---- */
+.asg-shieldchip {
+  display: inline-flex; align-items: center; gap: ${SPACE.s1};
+  font-family: var(--font-ui); font-weight: var(--weight-medium); font-size: 12px;
+  color: var(--color-trust); background: var(--color-trust-soft);
+  border: 1px solid var(--color-trust); border-radius: var(--radius-pill);
+  padding: 3px 10px; cursor: pointer; box-shadow: var(--shadow-badge);
+  line-height: 1.4; white-space: nowrap;
+}
+.asg-shieldchip:hover { background: var(--color-surface); }
+.asg-shieldchip:focus-visible { outline: 2px solid var(--color-trust); outline-offset: 2px; }
+.asg-shieldchip__dot { width: 13px; height: 13px; background: url("${logoDataUri()}") center / contain no-repeat; display: inline-block; }
+
 /* B1 redaction chips */
 .asg-redacted { font-size: 14px; line-height: 1.7; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: ${SPACE.s3}; white-space: pre-wrap; }
 .asg-chip { font-family: var(--font-data); font-size: 12px; color: var(--color-trust); background: var(--color-trust-soft); padding: 1px 6px; border-radius: var(--radius-sm); margin: 0 1px; }

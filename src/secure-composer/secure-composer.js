@@ -106,19 +106,16 @@ function scan() {
   // carry sensitive data (they can still redact or send anyway).
   sendBtn.dataset.risk = risky ? result.riskLevel : 'safe';
   sendBtn.textContent = risky ? 'Redact & send safely' : 'Insert & send';
-  // "No change" (insert exactly as typed, nothing redacted) only makes sense
-  // when there IS something to redact — when safe it would duplicate
-  // "Insert into chat", so it stays hidden.
-  noChangeBtn.hidden = !risky;
 }
 
 const scheduleScan = debounce(scan, 200);
 input.addEventListener('input', scheduleScan);
 
 /* --------------------------------- actions ------------------------------- */
-// Four choices when findings exist, mirroring the warning modal's options:
+// Four choices, always visible, mirroring the warning modal's options:
 //   Redact & send safely  → redact, inject, send        (submit(true))
-//   Insert into chat      → redact, inject, don't send  (submit(false))
+//                           (reads "Insert & send" while the text is safe)
+//   Insert into chat      → redact if risky, inject, don't send (submit(false))
 //   No change             → inject EXACTLY as typed — no redaction, no send
 //                           (the "send anyway" of Shield Mode; user's call)
 //   Cancel                → close, nothing leaves the frame

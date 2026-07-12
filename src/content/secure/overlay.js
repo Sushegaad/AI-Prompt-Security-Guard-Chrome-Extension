@@ -1,19 +1,23 @@
 /* ============================================================================
  * AI Prompt - Security Guard — Shield Mode overlay (content-script side)
  * ----------------------------------------------------------------------------
- * When Shield Mode is ON for a site, this positions an extension-origin iframe
- * (the secure composer) directly over the provider's real composer. The user
- * types inside the iframe — the provider's page scripts cannot read it. On
- * approval, the secure composer sends the approved text to the service worker,
- * which relays it here (SHIELD_INJECT); we write it into the real composer with
- * the existing writeInput() and optionally trigger the site's send.
+ * When Shield Mode is ON for a site, an always-visible "Shield" chip sits on
+ * the provider's composer. Clicking it (deliberate, never automatic) opens an
+ * extension-origin iframe (the secure composer) over the real composer. The
+ * user types inside the iframe — the provider's page scripts cannot read it.
+ * On approval, the secure composer sends the approved text to the service
+ * worker, which relays it here (SHIELD_INJECT); we write it into the real
+ * composer with the existing writeInput() and optionally trigger the site's
+ * send. Any draft already in the real composer is preserved (appended to),
+ * never wiped — it was typed knowingly outside the shield.
  *
  * Boundary summary: raw text lives only in the iframe (extension origin).
  * Approved text reaches this content script via the SW relay — never through
  * the provider page's window. It touches the provider only at writeInput().
  * ========================================================================== */
 
-import { writeInput } from '../dom-utils.js';
+import { readInput, writeInput } from '../dom-utils.js';
+import { createShadowHost } from '../ui/shadow-style.js';
 import { MSG } from '../../shared/storage.js';
 import { log } from '../../shared/log.js';
 
@@ -39,10 +43,6 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
   let relayHandler = null;
   let resizeObserver = null;
   let repositionTimer = null;
-  // Guards the close() → composer.focus() → focusin → open() loop: without it
-  // the overlay reopens the instant it closes (and open()'s writeInput('') can
-  // wipe just-injected text before doSubmit fires).
-  let suppressOpenUntil = 0;
 
   // The secure composer needs room for its header, findings list and action
   // bar even when the underlying composer has collapsed to a single row.
@@ -79,6 +79,7 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
     if (!composer || active) return;
     active = true;
     nonce = randomNonce();
+    syncChip(); // hide the chip while the shield is up
 
     const muted = (settingsRef().disabledCategories || []).join(',');
     const s = settingsRef().sensitivity || 'balanced';
@@ -92,13 +93,10 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
     positionOver(composer);
     document.documentElement.appendChild(frame);
 
-    // Clear any text that raced into the real composer before the overlay came
-    // up, so nothing typed under Shield Mode is left exposed behind us. Then
-    // blur it immediately: writeInput focuses the composer, but we want focus
-    // to move to the iframe (which focuses itself on load) — blurring closes
-    // the window in which a keystroke could still land in the provider box.
+    // Move focus to the iframe (which focuses itself on load). Any draft in
+    // the real composer stays put — it was typed deliberately outside the
+    // shield, and approved text is APPENDED to it on injection.
     try {
-      writeInput(composer, '');
       if (typeof composer.blur === 'function') composer.blur();
     } catch {
       /* ignore */
@@ -137,12 +135,10 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
     frame = null;
     nonce = '';
     contentHeight = 0;
-    // Refocusing the composer fires focusin — suppress the reopen it would
-    // otherwise trigger, so the shield doesn't flash back up (or wipe text
-    // we just injected).
-    suppressOpenUntil = Date.now() + 400;
+    syncChip(); // chip returns as soon as the shield is down
     if (refocus) {
       // Return focus to the real composer so the user can keep working.
+      // Opening again is always deliberate (the chip), so no reopen loop.
       const c = getComposer();
       if (c && typeof c.focus === 'function') c.focus();
     }
@@ -163,7 +159,15 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
     if (msg.type === MSG.SHIELD_INJECT) {
       const composer = getComposer();
       if (composer) {
-        writeInput(composer, String(msg.text || ''));
+        // Preserve any pre-existing draft: append, never overwrite.
+        let existing = '';
+        try {
+          existing = readInput(composer) || '';
+        } catch {
+          /* treat as empty */
+        }
+        const approved = String(msg.text || '');
+        writeInput(composer, existing.trim() ? existing + '\n' + approved : approved);
         if (msg.send) {
           // Let the site's framework register the value, then submit.
           setTimeout(() => {
@@ -176,34 +180,67 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
         }
       }
       // On send, leave focus where the site puts it (refocusing mid-submit
-      // can steal focus from the streaming response or reopen the shield).
+      // can steal focus from the streaming response).
       close({ refocus: !msg.send });
     }
   }
 
-  // Focus handoff: when Shield is on and the user focuses the REAL composer,
-  // open the secure overlay before they can type into the provider box.
-  function onFocusIn(e) {
-    if (!shieldEnabled()) return;
-    if (Date.now() < suppressOpenUntil) return; // programmatic refocus from close()
-    const composer = getComposer();
-    if (!composer) return;
-    if (e.target === composer || (composer.contains && composer.contains(e.target))) {
-      open();
-    }
+  /* ---- The chip: always-visible, deliberate entry point ------------------ */
+  // A small "Shield" pill pinned to the composer's top-right corner whenever
+  // Shield Mode is ON for this site and the shield isn't already open.
+  // Clicking it is the ONLY way the secure composer opens — nothing automatic,
+  // so it can never surprise the user or race the site's own focus handling.
+  let chipHost = null;
+  let chipTimer = null;
+
+  function ensureChip() {
+    if (chipHost) return chipHost;
+    const { host, root } = createShadowHost(document, 'asg-shield-chip-host');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'asg-shieldchip';
+    btn.setAttribute(
+      'aria-label',
+      'Open the AI Prompt - Security Guard secure composer — type privately, the site cannot read it until you approve'
+    );
+    btn.title = 'Type privately — the site cannot read your text until you approve it';
+    const dot = document.createElement('span');
+    dot.className = 'asg-shieldchip__dot';
+    dot.setAttribute('aria-hidden', 'true');
+    btn.append(dot, document.createTextNode('Shield'));
+    btn.addEventListener('click', open);
+    root.appendChild(btn);
+    Object.assign(host.style, {
+      position: 'fixed',
+      zIndex: '2147483645', // just under the shield frame
+      display: 'none',
+    });
+    document.documentElement.appendChild(host);
+    chipHost = host;
+    return chipHost;
   }
 
-  // Focus can already be inside the composer when Shield turns on, or after a
-  // suppressed refocus — then no focusin edge ever fires and keystrokes would
-  // land in the provider box. Catch the first keystroke and raise the shield.
-  function onKeyDown(e) {
-    if (active || !shieldEnabled()) return;
-    if (Date.now() < suppressOpenUntil) return;
+  function syncChip() {
     const composer = getComposer();
-    if (!composer) return;
-    if (e.target === composer || (composer.contains && composer.contains(e.target))) {
-      open();
+    const show = shieldEnabled() && !active && composer && document.contains(composer);
+    if (!show) {
+      if (chipHost) chipHost.style.display = 'none';
+      return;
     }
+    const host = ensureChip();
+    host.style.display = 'block';
+    const r = composer.getBoundingClientRect();
+    if (!r.width && !r.height) {
+      host.style.display = 'none';
+      return;
+    }
+    const w = host.offsetWidth || 72;
+    const h = host.offsetHeight || 24;
+    // Straddle the composer's top-right corner; clamp to the viewport.
+    const left = Math.max(4, Math.min(r.right - w - 10, window.innerWidth - w - 4));
+    const top = Math.max(4, r.top - h / 2);
+    host.style.left = left + 'px';
+    host.style.top = top + 'px';
   }
 
   function shieldEnabled() {
@@ -213,8 +250,13 @@ export function createShieldOverlay({ getComposer, getSubmitButton, doSubmit, se
   }
 
   function attach() {
-    document.addEventListener('focusin', onFocusIn, true);
-    document.addEventListener('keydown', onKeyDown, true);
+    // Keep the chip glued to the composer across SPA layout shifts, scrolls,
+    // resizes, and settings toggles (per-site Shield on/off from the popup).
+    chipTimer = chipTimer || setInterval(syncChip, 400);
+    window.addEventListener('resize', syncChip, true);
+    window.addEventListener('scroll', syncChip, true);
+    syncChip();
+
     relayHandler = (msg) => handleRelay(msg);
     try {
       chrome.runtime.onMessage.addListener((msg) => {

@@ -386,7 +386,9 @@ function maybeShowCapabilityNotice() {
       'send. AI Prompt - Security Guard warns you at send time — and Shield Mode (in the ' +
       'toolbar popup) lets you type privately, so nothing reaches this site ' +
       'until you approve it.',
-    note: 'You can turn Shield Mode on per site from the AI Prompt - Security Guard popup.',
+    note:
+      'You can turn Shield Mode on per site from the AI Prompt - Security Guard popup. ' +
+      'When it is on, click the Shield chip on the message box to type privately.',
   });
   try {
     chrome.runtime.sendMessage({

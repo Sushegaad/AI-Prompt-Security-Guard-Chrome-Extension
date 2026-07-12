@@ -29,12 +29,20 @@ store reviewers can see exactly what changed and why.
 - The marketing site self-hosts its fonts (was Google Fonts) — no third-party
   requests from the site, matching the product's privacy posture.
 
+### Shield Mode: deliberate invocation via chip
+- The secure composer now opens ONLY from an always-visible "Shield" chip
+  pinned to the composer's top-right corner (shown when Shield Mode is on for
+  the site). The focusin/keydown auto-open — and the reopen races it caused —
+  is gone. Cancel/Esc closes until the chip is clicked again.
+- Drafts in the real composer are preserved: approved text is appended on
+  injection, never overwritten (auto-open used to clear the box on the way up).
+
 ### Shield Mode composer actions
-- Four actions when findings exist, mirroring the warning modal's choices:
-  "Redact & send safely", "Insert into chat" (redacted, no send),
-  "No change" (insert exactly as typed — Shield Mode's "send anyway";
-  hidden while the text is safe), and "Cancel". Action bar wraps in
-  narrow composers.
+- Four actions, always visible, mirroring the warning modal's choices:
+  "Redact & send safely" (reads "Insert & send" while safe), "Insert into
+  chat" (redacted if risky, no send), "No change" (insert exactly as typed —
+  Shield Mode's "send anyway"), and "Cancel". Action bar wraps in narrow
+  composers.
 
 ### Brand & site
 - New logo mark: a shield built from a chat bubble with a keyhole (spec in
