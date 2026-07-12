@@ -31,6 +31,7 @@ const input = document.getElementById('sc-input');
 const findingsEl = document.getElementById('sc-findings');
 const sendBtn = document.getElementById('sc-send');
 const insertBtn = document.getElementById('sc-insert');
+const noChangeBtn = document.getElementById('sc-nochange');
 const cancelBtn = document.getElementById('sc-cancel');
 
 let lastResult = { riskLevel: 'safe', matches: [] };
@@ -105,19 +106,29 @@ function scan() {
   // carry sensitive data (they can still redact or send anyway).
   sendBtn.dataset.risk = risky ? result.riskLevel : 'safe';
   sendBtn.textContent = risky ? 'Redact & send safely' : 'Insert & send';
+  // "No change" (insert exactly as typed, nothing redacted) only makes sense
+  // when there IS something to redact — when safe it would duplicate
+  // "Insert into chat", so it stays hidden.
+  noChangeBtn.hidden = !risky;
 }
 
 const scheduleScan = debounce(scan, 200);
 input.addEventListener('input', scheduleScan);
 
 /* --------------------------------- actions ------------------------------- */
-function submit(send) {
+// Four choices when findings exist, mirroring the warning modal's options:
+//   Redact & send safely  → redact, inject, send        (submit(true))
+//   Insert into chat      → redact, inject, don't send  (submit(false))
+//   No change             → inject EXACTLY as typed — no redaction, no send
+//                           (the "send anyway" of Shield Mode; user's call)
+//   Cancel                → close, nothing leaves the frame
+function submit(send, { allowRedact = true } = {}) {
   const text = readText();
   if (!text.trim()) {
     cancel();
     return;
   }
-  const risky = sendBtn.dataset.risk && sendBtn.dataset.risk !== 'safe';
+  const risky = allowRedact && sendBtn.dataset.risk && sendBtn.dataset.risk !== 'safe';
   // If the send button is in "redact" state, redact before injecting.
   const outText = risky ? redact(text, lastResult.matches).redactedText : text;
   post(MSG.SHIELD_SUBMIT, { text: outText, redacted: risky, send: !!send });
@@ -137,6 +148,7 @@ function post(type, extra) {
 
 sendBtn.addEventListener('click', () => submit(true));
 insertBtn.addEventListener('click', () => submit(false));
+noChangeBtn.addEventListener('click', () => submit(false, { allowRedact: false }));
 cancelBtn.addEventListener('click', cancel);
 
 // Keyboard parity with the real composer: Enter = insert & send, Shift+Enter =

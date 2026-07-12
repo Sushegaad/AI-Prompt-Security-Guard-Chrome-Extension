@@ -29,6 +29,13 @@ store reviewers can see exactly what changed and why.
 - The marketing site self-hosts its fonts (was Google Fonts) — no third-party
   requests from the site, matching the product's privacy posture.
 
+### Shield Mode composer actions
+- Four actions when findings exist, mirroring the warning modal's choices:
+  "Redact & send safely", "Insert into chat" (redacted, no send),
+  "No change" (insert exactly as typed — Shield Mode's "send anyway";
+  hidden while the text is safe), and "Cancel". Action bar wraps in
+  narrow composers.
+
 ### Brand & site
 - New logo mark: a shield built from a chat bubble with a keyhole (spec in
   `Plans/AI Prompt - Security Guard Logo.pdf`). Single source in
