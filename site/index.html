@@ -322,6 +322,7 @@
         <div class="feat"><h3>One-click redaction</h3><p>Swaps secrets for labels like <span class="mono">[EMAIL]</span> and <span class="mono">[API_KEY]</span>.</p></div>
         <div class="feat"><h3>Attachment scanning</h3><p>Reads PDF &amp; Word text locally, comments and metadata too.</p></div>
         <div class="feat"><h3>Three sensitivity modes</h3><p>Basic, Balanced and Strict, switchable any time.</p></div>
+        <div class="feat"><h3>Shield Mode</h3><p>Optional private composer: sites can't read your draft as you type — text stays yours until you approve it.</p></div>
         <div class="feat"><h3>Per-site control</h3><p>Turn watching on or off per site; add custom domains.</p></div>
         <div class="feat"><h3>Accessible</h3><p>Keyboard operable, screen-reader ready. WCAG 2.1 AA &amp; Section 508.</p></div>
         <div class="feat"><h3>Least privilege</h3><p>Runs only on supported AI sites; requests only what it uses.</p></div>
@@ -379,7 +380,8 @@
           <dl>
             <dt>storage</dt><dd>Save your settings &amp; the counter — on your device.</dd>
             <dt>offscreen</dt><dd>Run the bundled PDF text extractor locally. No requests.</dd>
-            <dt>host (AI sites)</dt><dd>Only the AI tools you enable — never all sites.</dd>
+            <dt>scripting</dt><dd>Run the bundled scanner on custom domains you add — never remote code.</dd>
+            <dt>host (AI sites)</dt><dd>Only the AI tools you enable — never all sites. Custom domains are granted one origin at a time, when you add them.</dd>
           </dl>
           <p class="perm__foot">No access to browsing history, bookmarks, or downloads.</p>
         </div>

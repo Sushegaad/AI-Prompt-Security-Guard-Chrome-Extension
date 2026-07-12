@@ -139,6 +139,18 @@ A new section lists muted categories with per-row "Unmute" buttons, each labelle
 
 `.section__hint`, `.domain-status`, and `.stat__split` are styled from design tokens: hint and split use `--color-muted` (#6B7280, 4.86:1 on the paper background — passes AA for their ≥ 11px text), status body uses `--color-ink`, error state uses `--risk-critical-fg` (4.63:1+). No new contrast failures.
 
+### A5 — Shield Mode secure composer (extension-origin iframe)
+
+Shield Mode (off by default, per-site) replaces typing in the provider's composer with an extension-origin iframe (`src/secure-composer/`) positioned over it by `content/secure/overlay.js`. Assessment of the new surface:
+
+- **Name/role/value.** The iframe carries `title="AI Prompt - Security Guard secure composer"`; the input is a `contenteditable` with `role="textbox"`, `aria-multiline="true"`, and an `aria-label` explaining that scanning is local and text stays private until approved. Findings use `role="list"`/`role="listitem"` with masked values; action buttons are native `<button>`s. The document declares `lang="en"` and a descriptive `<title>`.
+- **Keyboard.** Full parity with the real composer: Enter = insert & send, Shift+Enter = newline, Escape = cancel. Escape closes the frame and focus returns to the provider's composer (`close()` refocuses it), so there is no keyboard trap (2.1.2). Tab order inside the frame is input → findings → buttons.
+- **Focus management.** Opening moves focus into the iframe input; the trigger is the user focusing (or typing in) the composer they intended to use, so the context change is user-initiated (3.2.1). On close, focus is restored to the real composer except after an approved send, where the site's own post-send focus behavior is respected.
+- **Contrast.** All colors come from the shared tokens (`tokens.css`), including the remediated risk-pill pairs (≥ 4.63:1); the "Shield on" strip uses `--color-trust` on `--color-trust-soft` (passes AA for its 12px text). Risk state also changes the primary button's *text* ("Insert & send" → "Redact & send safely"), so meaning does not rely on color (1.4.1).
+- **Reflow/resize.** The frame reports its needed height (`SHIELD_RESIZE`, a px number only) and the overlay grows with content — long text and findings scroll rather than clip (1.4.4 / 1.4.10).
+
+No new Level A or AA findings. **Advisory (A5-a):** the live findings list updates as the user types but is not an `aria-live` region; a screen-reader user discovers findings by leaving the input. Consistent with the calm-by-default product tone, but worth revisiting — a polite live region announcing "3 findings" (throttled) would improve parity. Recorded as advisory alongside F7.
+
 ### Addendum verdict
 
-No new findings at Level A or AA. F7 (advisory `aria-describedby` on the disabled send button) remains the only open item, unchanged from the original audit. A manual NVDA/VoiceOver pass over the mute → re-render → focus path is recommended as part of the pre-submission screen-reader check.
+No new findings at Level A or AA. F7 (advisory `aria-describedby` on the disabled send button) and A5-a (advisory live-region announcement of secure-composer findings) are the only open items, both advisory. A manual NVDA/VoiceOver pass over the mute → re-render → focus path and the Shield Mode open → type → Escape path is recommended as part of the pre-submission screen-reader check.

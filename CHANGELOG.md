@@ -11,6 +11,16 @@ store reviewers can see exactly what changed and why.
   docs, site copy and package name. Internal `asg-`/`.asg` prefixes and
   element ids unchanged (not user-facing; avoids breaking selectors/tests).
 
+### Brand & site
+- New logo mark: a shield built from a chat bubble with a keyhole (spec in
+  `Plans/AI Prompt - Security Guard Logo.pdf`). Single source in
+  `src/shared/logo.js`; toolbar/store PNGs regenerated, with a simplified
+  keyhole-as-dot variant at 16px per the scale-down rule.
+- Landing page rewritten to the new design (`Plans/AI Prompt - Security
+  Guard.pdf`): hand-written, zero-JS, ~29KB (was a 742KB bundled export).
+  Permissions panel now also lists `scripting`; Shield Mode added to the
+  features grid. Google site-verification tag preserved.
+
 ### EU / multilingual detection
 - French, German and Spanish keyword packs across health, workplace,
   special-category, legal, restriction, financial, education and children lists.

@@ -4,7 +4,7 @@
 
 Based on VPAT Version 2.5 (Revised Section 508 edition).
 
-This is a self-assessment prepared by the product author, intended to accompany the extension when it is offered to a federal agency. It reflects the source code as of version 1.0.0 (July 2026 build), including the newer surfaces audited in the addendum to `ACCESSIBILITY-AUDIT.md` (per-category mute controls, the custom-domain permission flow with inline status messages, and the muted-warnings/unmute section). The remediation described in `ACCESSIBILITY-AUDIT.md` (findings F1 through F6) has been implemented and is covered by automated tests, and this report reflects that remediated build. It has not yet been validated by an independent third party; an independent evaluation can be arranged on request.
+This is a self-assessment prepared by the product author, intended to accompany the extension when it is offered to a federal agency. It reflects the source code as of version 1.0.0 (July 2026 build), including the newer surfaces audited in the addendum to `ACCESSIBILITY-AUDIT.md` (per-category mute controls, the custom-domain permission flow with inline status messages, the muted-warnings/unmute section, and the Shield Mode secure composer). The remediation described in `ACCESSIBILITY-AUDIT.md` (findings F1 through F6) has been implemented and is covered by automated tests, and this report reflects that remediated build. It has not yet been validated by an independent third party; an independent evaluation can be arranged on request.
 
 ---
 
@@ -17,7 +17,7 @@ This is a self-assessment prepared by the product author, intended to accompany 
 | Product description | A free, on-device Chrome extension (Manifest V3) that warns the user before sensitive information is sent to an AI chat tool. All scanning is local; no user content leaves the browser. |
 | Date | July 2026 |
 | Contact | Hemant Naik, hemant.naik@gmail.com |
-| Evaluation method | Manual source-code review of the popup, onboarding, and warning/redact UI, plus programmatic WCAG color-contrast calculation. Self-assessment. |
+| Evaluation method | Manual source-code review of the popup, onboarding, warning/redact UI, and the Shield Mode secure composer, plus programmatic WCAG color-contrast calculation. Self-assessment. |
 
 ### Applicable standards
 
@@ -48,7 +48,7 @@ This is a self-assessment prepared by the product author, intended to accompany 
 | 1.4.1 Use of Color | Supports | Every risk level carries a text label in addition to color. |
 | 1.4.2 Audio Control | Not Applicable | No audio. |
 | 2.1.1 Keyboard | Supports | All controls are keyboard operable, including the onboarding sensitivity options (native `<button>` elements), the per-finding mute buttons inside the warning dialog's focus trap, and the custom-domain input (Enter activates Add). Regression tests assert this. |
-| 2.1.2 No Keyboard Trap | Supports | The warning modal uses an intentional, escapable focus trap (Escape and the close button both dismiss it); focus is restored on close. |
+| 2.1.2 No Keyboard Trap | Supports | The warning modal uses an intentional, escapable focus trap (Escape and the close button both dismiss it); focus is restored on close. The Shield Mode secure composer likewise closes on Escape and returns focus to the site's composer. |
 | 2.1.4 Character Key Shortcuts | Not Applicable | No single-character key shortcuts are defined. |
 | 2.2.1 Timing Adjustable | Not Applicable | No time limits. |
 | 2.2.2 Pause, Stop, Hide | Not Applicable | No moving, blinking, or auto-updating content. |
