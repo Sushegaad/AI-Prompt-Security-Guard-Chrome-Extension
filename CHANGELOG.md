@@ -29,6 +29,13 @@ store reviewers can see exactly what changed and why.
 - The marketing site self-hosts its fonts (was Google Fonts) — no third-party
   requests from the site, matching the product's privacy posture.
 
+### Popup fixes
+- Header no longer squeezes "Protecting this tab" beside the (longer) product
+  name — the status sits on its own line, aligned under the wordmark.
+- The footer privacy link was dead (no handler); it now opens the hosted
+  privacy policy in a new tab, and is labelled "Privacy policy" to match what
+  it does.
+
 ### Shield Mode: deliberate invocation via chip
 - The secure composer now opens ONLY from an always-visible "Shield" chip
   pinned to the composer's top-right corner (shown when Shield Mode is on for
@@ -68,8 +75,10 @@ store reviewers can see exactly what changed and why.
 
 ### Feedback loop
 - One-time popup hint when "sent anyway" exceeds 60% of 20+ outcomes.
-- Optional local catch history (off by default): last 20 warnings, masked
-  values only, clearable, documented in PRIVACY.md.
+- Catch history (a masked-values-only local log, briefly built during this
+  cycle) was REMOVED before release: it was the only thing that persisted any
+  trace of typed content, even masked. `RECORD_CATCH` now bumps the local
+  counter only and carries no content. PRIVACY.md and site copy updated.
 
 ### CI
 - Tier A e2e now also runs on every push to main (was PR/schedule only).

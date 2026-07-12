@@ -234,51 +234,6 @@ export function initPopup(opts = {}) {
       );
     }
 
-    // --- Recent catches (optional, local-only, masked values) -------------
-    body.appendChild(
-      el('div.section', {}, [
-        el('p.section__label', { text: 'Catch history' }),
-        el('label.toggle-row', {}, [
-          el('span.toggle-row__label', { text: 'Keep a local history of catches' }),
-          el('input.switch', {
-            type: 'checkbox',
-            'data-setting': 'catchHistory',
-            checked: settings.catchHistory === true,
-            onchange: (e) => persist({ catchHistory: e.target.checked }),
-          }),
-        ]),
-        ...(settings.catchHistory && (settings.recentCatches || []).length
-          ? [
-              ...(settings.recentCatches || []).slice(0, 20).map((c) =>
-                el('div.catch-row', {}, [
-                  el('span.catch-row__time', {
-                    text: new Date(c.t).toLocaleString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    }),
-                  }),
-                  el('span.catch-row__items.asg-data', {
-                    text: (c.items || [])
-                      .map((i) => `${CATEGORY[i.category] ? CATEGORY[i.category].type : i.category} ${i.masked}`)
-                      .join(' · '),
-                  }),
-                ])
-              ),
-              el('button.asg-btn.asg-btn--secondary', {
-                type: 'button',
-                'data-clear-history': '1',
-                text: 'Clear history',
-                onclick: () => persist({ recentCatches: [] }),
-              }),
-            ]
-          : settings.catchHistory
-            ? [el('p.section__hint', { text: 'Nothing recorded yet — catches will appear here, masked.' })]
-            : [el('p.section__hint', { text: 'Off by default. Stored on this device only, masked values only.' })]),
-      ])
-    );
-
     // --- Stat (all local — never uploaded) ---
     const outcomes = settings.outcomes || {};
     body.appendChild(
@@ -307,6 +262,10 @@ export function initPopup(opts = {}) {
   return { render, getSettings: () => settings };
 }
 
+// Hosted privacy page (GitHub Pages deploy of site/) — same content as the
+// bundled PRIVACY.md, kept current with every release.
+const PRIVACY_URL = 'https://sushegaad.github.io/AI-Prompt-Security-Guard-Chrome-Extension/privacy.html';
+
 // Auto-init only as a real extension page (where chrome.runtime.sendMessage
 // exists). Tests import the module and call initPopup() with an injected send.
 if (
@@ -317,4 +276,16 @@ if (
   typeof chrome.runtime.sendMessage === 'function'
 ) {
   initPopup();
+  // Footer "Privacy & settings" → open the privacy policy in a new tab.
+  const privacyLink = document.getElementById('privacy-link');
+  if (privacyLink) {
+    privacyLink.addEventListener('click', () => {
+      try {
+        chrome.tabs.create({ url: PRIVACY_URL });
+        window.close();
+      } catch {
+        /* popup without tabs API — leave the popup open */
+      }
+    });
+  }
 }

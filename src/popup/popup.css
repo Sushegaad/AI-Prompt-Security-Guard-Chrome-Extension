@@ -7,9 +7,12 @@ body.asg-root {
 }
 
 .popup-header {
+  /* The full product name is long — stack the status on its own line under
+     the wordmark instead of squeezing it beside the name. */
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   padding: var(--space-4);
   border-bottom: 1px solid var(--color-border);
 }
@@ -29,6 +32,8 @@ body.asg-root {
 .status {
   color: var(--color-muted);
   font-size: var(--text-xs);
+  /* align with the wordmark text: 18px mark + the wordmark's gap */
+  margin-left: calc(18px + var(--space-2));
 }
 
 .popup-body {

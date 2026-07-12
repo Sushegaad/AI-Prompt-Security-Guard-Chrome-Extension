@@ -192,13 +192,10 @@ function openModal(result, text) {
         // box. Re-scan once the site has had a moment to clear.
         setTimeout(runScan, 800);
       },
-      onCatch: (res) => {
+      onCatch: () => {
         try {
-          // Masked values only — raw secrets never leave the page context.
-          const findings = (res && res.matches ? res.matches : [])
-            .filter((m) => m.showInModal)
-            .map((m) => ({ category: m.category, masked: m.maskedValue }));
-          chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH, findings });
+          // Counter bump only — nothing derived from the text leaves the page.
+          chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
         } catch {
           /* ignore */
         }
@@ -356,10 +353,7 @@ async function onAttach(files) {
         findings: result.matches,
       });
       try {
-        chrome.runtime.sendMessage({
-          type: MSG.RECORD_CATCH,
-          findings: findings.map((m) => ({ category: m.category, masked: m.maskedValue })),
-        });
+        chrome.runtime.sendMessage({ type: MSG.RECORD_CATCH });
       } catch {
         /* ignore */
       }

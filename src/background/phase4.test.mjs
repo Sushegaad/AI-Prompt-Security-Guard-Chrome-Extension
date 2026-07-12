@@ -39,7 +39,7 @@ globalThis.chrome = {
   },
 };
 
-const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, recordCatch, sanitizePatch } =
+const { DEFAULT_SETTINGS, MSG, withDefaults, readSettings, writeSettings, bumpCatch, sanitizePatch } =
   await import('../shared/storage.js');
 const { routeMessage } = await import('./service-worker.js');
 
@@ -73,7 +73,7 @@ ok('withDefaults keeps override', withDefaults({ enabledSites: { claude: false }
   const deps = {
     readSettings: () => readSettings(area),
     writeSettings: (p) => writeSettings(p, area),
-    recordCatch: (f) => recordCatch(f, area),
+    bumpCatch: () => bumpCatch(area),
   };
   // Settings reads no longer route through messages (native readSettings +
   // storage.onChanged); the router only handles writes.

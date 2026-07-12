@@ -28,11 +28,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // Outcome split for the caught counter — what the user did after a warning.
   // All local, never uploaded (see PRIVACY.md).
   outcomes: Object.freeze({ redacted: 0, sentAnyway: 0, edited: 0 }),
-  // Optional, off by default: a local-only list of recent catches shown in the
-  // popup ({ t, items: [{ category, masked }] }). MASKED values only — the raw
-  // secret never reaches storage. Capped at RECENT_CATCHES_MAX, clearable.
-  catchHistory: false,
-  recentCatches: [],
   // One-time popup hint when "sent anyway" dominates outcomes (self-tuning
   // nudge, see shouldShowNoiseHint). Set true once dismissed.
   noiseHintDismissed: false,
@@ -45,8 +40,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   // notice. Keyed by site id / custom host → true once dismissed.
   perSiteNoticeSeen: {},
 });
-
-export const RECENT_CATCHES_MAX = 20;
 
 /**
  * The feedback loop actually looping: if the user overrides most warnings,
@@ -68,7 +61,7 @@ import { UNMUTABLE_CATEGORIES } from './categories.js';
 /** Message types exchanged with the service worker. */
 export const MSG = Object.freeze({
   SET_SETTINGS: 'SET_SETTINGS', // writes only — reads use readSettings() + storage.onChanged
-  RECORD_CATCH: 'RECORD_CATCH',
+  RECORD_CATCH: 'RECORD_CATCH', // bump the local caught-counter; carries NO content
   RECORD_OUTCOME: 'RECORD_OUTCOME', // { action: 'redacted'|'sentAnyway'|'edited' }
   MUTE_CATEGORY: 'MUTE_CATEGORY', // { category } — adds to disabledCategories
   EXTRACT_PDF: 'EXTRACT_PDF', // content -> SW -> offscreen: parse a PDF locally
@@ -135,7 +128,6 @@ export function sanitizePatch(patch = {}) {
   }
   if (has('scanAttachments')) out.scanAttachments = !!patch.scanAttachments;
   if (has('onboardingComplete')) out.onboardingComplete = !!patch.onboardingComplete;
-  if (has('catchHistory')) out.catchHistory = !!patch.catchHistory;
   if (has('noiseHintDismissed')) out.noiseHintDismissed = !!patch.noiseHintDismissed;
   // Per-site boolean maps: keep only string keys with coerced boolean values,
   // capped so a hostile caller can't bloat storage.
@@ -147,11 +139,6 @@ export function sanitizePatch(patch = {}) {
       }
       out[key] = clean;
     }
-  }
-  // History entries are written only by the service worker (recordCatch);
-  // external callers may only CLEAR the list, never inject entries.
-  if (has('recentCatches') && Array.isArray(patch.recentCatches) && patch.recentCatches.length === 0) {
-    out.recentCatches = [];
   }
   if (has('riskySubmissionsCaught') && Number.isFinite(patch.riskySubmissionsCaught)) {
     out.riskySubmissionsCaught = Math.max(0, Math.floor(patch.riskySubmissionsCaught));
@@ -180,30 +167,6 @@ export async function bumpCatch(area) {
   const next = (riskySubmissionsCaught || 0) + 1;
   await storage.set({ riskySubmissionsCaught: next });
   return next;
-}
-
-/**
- * Record a catch: bump the counter and, when the user has opted into local
- * catch history, prepend a MASKED-values-only entry (capped, clearable).
- * Findings are validated defensively: strings only, length-capped, item-capped.
- */
-export async function recordCatch(findings, area) {
-  const storage = area || chrome.storage.local;
-  const riskySubmissionsCaught = await bumpCatch(storage);
-  const { catchHistory, recentCatches } = await storage.get({ catchHistory: false, recentCatches: [] });
-  if (catchHistory && Array.isArray(findings) && findings.length) {
-    const items = findings
-      .filter((f) => f && typeof f.category === 'string' && typeof f.masked === 'string')
-      .slice(0, 10)
-      .map((f) => ({ category: f.category.slice(0, 32), masked: f.masked.slice(0, 40) }));
-    if (items.length) {
-      const list = Array.isArray(recentCatches) ? recentCatches : [];
-      await storage.set({
-        recentCatches: [{ t: Date.now(), items }, ...list].slice(0, RECENT_CATCHES_MAX),
-      });
-    }
-  }
-  return { riskySubmissionsCaught };
 }
 
 /**

@@ -12,7 +12,7 @@ FedRAMP authorizes cloud service offerings that store, process, or transmit fede
 
 ## Data flow and the no-egress guarantee
 
-The only data the extension persists is the user's own settings (sensitivity level, which sites are watched, custom domains, muted warning categories, per-site Shield Mode flags) and a few local counters: how many risky sends were caught, and what the user chose after each warning (redacted / sent anyway / kept editing). An optional, off-by-default "catch history" additionally stores the last 20 warnings as category names and masked values only (e.g. `sk-live-••••`), clearable at any time. These live in `chrome.storage` on the device and are never transmitted. No prompt text, file content, or raw detected value is ever stored or transmitted.
+The only data the extension persists is the user's own settings (sensitivity level, which sites are watched, custom domains, muted warning categories, per-site Shield Mode flags) and a few local counters: how many risky sends were caught, and what the user chose after each warning (redacted / sent anyway / kept editing). These live in `chrome.storage` on the device and are never transmitted. No prompt text, file content, or detected value — raw or masked — is ever stored or transmitted.
 
 Detection is a pure, synchronous function over the text in the page. Attached PDFs are parsed locally in an offscreen document running the bundled pdf.js on the extension's own origin; Word files are parsed inline. The only network request the extension makes is loading its own bundled woff2 fonts from within the extension package. Raw secrets never reach the UI: the warning shows only masked values (for example `sk-live-****`).
 

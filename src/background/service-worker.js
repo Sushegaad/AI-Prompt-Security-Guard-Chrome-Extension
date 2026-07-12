@@ -8,7 +8,7 @@
  * settings in memory; every handler reads from chrome.storage fresh.
  * ========================================================================== */
 
-import { MSG, readSettings, writeSettings, recordCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
+import { MSG, readSettings, writeSettings, bumpCatch, bumpOutcome, muteCategory } from '../shared/storage.js';
 import { scriptIdFor, originFor } from '../shared/domains.js';
 
 /* --- First run: open onboarding ------------------------------------------ */
@@ -170,10 +170,10 @@ export async function routeMessage(msg, deps = {}) {
       return settings;
     }
     case MSG.RECORD_CATCH: {
-      // Bumps the counter; also stores a masked-only history entry when the
-      // user has opted into catch history (storage.recordCatch validates).
-      const rec = deps.recordCatch || recordCatch;
-      return rec(msg.findings);
+      // Bumps the local caught-counter. The message carries no content —
+      // nothing derived from what the user typed is ever persisted.
+      const bump = deps.bumpCatch || bumpCatch;
+      return { riskySubmissionsCaught: await bump() };
     }
     case MSG.RECORD_OUTCOME: {
       const bumpOut = deps.bumpOutcome || bumpOutcome;
