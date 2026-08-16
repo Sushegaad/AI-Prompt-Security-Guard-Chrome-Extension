@@ -12,6 +12,11 @@ store reviewers can see exactly what changed and why.
   element ids unchanged (not user-facing; avoids breaking selectors/tests).
 
 ### Internals & security hygiene
+- **Security fix:** pdfjs-dist bumped 6.1.200 → 6.2.108, closing
+  GHSA-hq66-cqwq-w95j (arbitrary JavaScript execution when opening a
+  malicious PDF) — directly relevant since attached PDFs are parsed locally.
+  Caught by the new CI `npm audit` gate on its first run. SBOM regenerated;
+  full suite green against the new version.
 - Privacy audit rewritten to match reality: stale "cloud rewrite" spec text
   removed; Shield's approved-text relay is now an EXPLICIT audited exception —
   new checks confine `SHIELD_SUBMIT`/`SHIELD_INJECT` to the four relay files
