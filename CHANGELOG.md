@@ -52,6 +52,11 @@ store reviewers can see exactly what changed and why.
   composers.
 
 ### Brand & site
+- Site & README enriched with real product screenshots (store-assets/ready)
+  and the demo video (click-to-load YouTube facade on the site — no
+  third-party request until play; linked thumbnail on GitHub). README gains
+  store/CI/license badges; stale image references and the old video link
+  fixed; catch-history feature bullet removed.
 - New logo mark: a shield built from a chat bubble with a keyhole (spec in
   `Plans/AI Prompt - Security Guard Logo.pdf`). Single source in
   `src/shared/logo.js`; toolbar/store PNGs regenerated, with a simplified

@@ -1,10 +1,17 @@
 <p align="center">
-  <img src="assets/icons/icon128.png" width="88" height="88" alt="AI Prompt - Security Guard logo" />
+  <img src="assets/icons/icon128.png" width="96" height="96" alt="AI Prompt - Security Guard logo" />
 </p>
 
 <h1 align="center">AI Prompt - Security Guard</h1>
 
-<p align="center"><b>Think before you send.</b><br />A free Chrome extension that warns you before private information reaches an AI tool. All scanning happens on your device.</p>
+<p align="center"><b>Think before you send.</b><br />A free Chrome extension that warns you before private information reaches an AI tool.<br />All scanning happens on your device — no accounts, no logging, no network calls.</p>
+
+<p align="center">
+  <a href="https://chromewebstore.google.com/detail/ai-prompt-security-guard/ipoadoogocaeeijapcohiehibkoihcdn"><img src="https://img.shields.io/chrome-web-store/v/ipoadoogocaeeijapcohiehibkoihcdn?label=Chrome%20Web%20Store&color=3B5BDB" alt="Chrome Web Store" /></a>
+  <a href="https://github.com/Sushegaad/AI-Prompt-Security-Guard-Chrome-Extension/actions/workflows/ci.yml"><img src="https://github.com/Sushegaad/AI-Prompt-Security-Guard-Chrome-Extension/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
+  <a href="https://sushegaad.github.io/AI-Prompt-Security-Guard-Chrome-Extension/"><img src="https://img.shields.io/badge/website-live-3B5BDB" alt="Website" /></a>
+</p>
 
 ## Install
 
@@ -12,16 +19,21 @@
 
 ## See it in action
 
-▶️ **[Watch the 1-minute demo](https://youtu.be/cRWgHaxGqjY)** — type a secret, the badge turns red, the warning opens, one click redacts.
+▶️ **[Watch the 1-minute demo](https://www.youtube.com/watch?v=Qj2S3MiqH-w)** — type a secret, the badge turns red, the warning opens, one click redacts.
 
-[![AI Prompt - Security Guard demo](store-assets/promo-marquee.png)](https://youtu.be/cRWgHaxGqjY)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=Qj2S3MiqH-w"><img src="https://img.youtube.com/vi/Qj2S3MiqH-w/maxresdefault.jpg" width="720" alt="Play the AI Prompt - Security Guard demo video" /></a>
+</p>
 
-| | |
+| The pre-send warning — findings listed, values masked | Shield Mode — type privately, the site can't read it |
 |---|---|
-| ![Pre-send warning with masked findings](store-assets/screenshot-2-warning.png) | ![Identifying sensitive information as you type](store-assets/screenshot-3-findings.png) |
-| ![One-click redaction, rescanned safe](store-assets/screenshot-4-redacted.png) | ![Settings popup: sensitivity, sites, catch history](store-assets/screenshot-5-settings.png) |
+| ![Pre-send warning with masked findings over a ChatGPT draft](store-assets/ready/screenshot-02-default-mode-protecting-what-you-send-1280x800.png) | ![Shield Mode private composer over the chat box](store-assets/ready/screenshot-05-shield-mode-protecting-what-you-type-1280x800.png) |
+| **One-click redaction — secrets become safe labels** | **Verify it yourself — zero network activity while you type** |
+| ![One-click redaction replacing secrets with labels](store-assets/ready/screenshot-06-default-mode-redaction-1280x800.png) | ![DevTools network panel showing zero requests while typing in Shield Mode](store-assets/ready/screenshot-04-shield-mode-no-network-activity-1280x800.png) |
+| **Three-step setup** | **Sensitivity, sites & Shield Mode in one small popup** |
+| ![First-run setup](store-assets/ready/screenshot-01-setup-1280x800.png) | ![Settings popup: sensitivity, sites, Shield Mode](store-assets/ready/screenshot-03-configuration-1280x800.png) |
 
-*These are the screenshots submitted to the Chrome Web Store ([installation](store-assets/screenshot-1-installation.png) shot included there too).*
+*The same screenshots ship on the [Chrome Web Store listing](https://chromewebstore.google.com/detail/ai-prompt-security-guard/ipoadoogocaeeijapcohiehibkoihcdn).*
 
 ## What this does
 
@@ -39,8 +51,8 @@ If you try to send something risky, it pauses and shows a clear warning listing 
 - One-click redaction that swaps sensitive values for labels like [EMAIL] and [API_KEY].
 - Attachment scanning. Attach a PDF or Word file and it scans the file's text on your device, including hidden comments and metadata. Pasted or attached images get a gentle reminder — screenshots often carry secrets no text scanner can read.
 - US and EU coverage: detection keywords in English, French, German, and Spanish, plus checksum-validated European identifiers (IBAN, French NIR, German Steuer-ID, Spanish DNI) alongside SSNs and cards.
-- Optional local catch history: see your last 20 warnings (masked values only), on-device, clearable.
-- **Shield Mode (experimental, opt-in per site):** type inside an extension-owned box the website's scripts cannot read; only approved (optionally redacted) text is placed into the real message box. The strongest answer to "sites that read drafts as you type."
+- Nothing derived from your text is ever stored — not even masked values. The only stored numbers are your settings and a local "risky sends caught" counter.
+- **Shield Mode (experimental, opt-in per site):** click the Shield chip on the chat box to type inside an extension-owned composer the website's scripts cannot read; only approved (optionally redacted) text is placed into the real message box. The strongest answer to "sites that read drafts as you type."
 - Three sensitivity modes: Basic, Balanced, and Strict.
 - Per-site control from a small popup, plus experimental custom domains: add any https AI site and Chrome asks you to grant access for that one site only.
 - Accessible. Fully keyboard operable with visible focus and screen-reader support, meeting WCAG 2.1 AA and Section 508.
