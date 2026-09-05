@@ -3,6 +3,21 @@
 All notable changes to AI Prompt - Security Guard. Selector bumps get their own lines so
 store reviewers can see exactly what changed and why.
 
+## v1.0.1 — September 2026 (store-review remediation)
+
+### Chrome Web Store "Code Readability" fix
+- The reviewer flagged the bundled pdf.js as obfuscated — the trigger was the
+  LEGACY build's IE-era core-js shims (`ActiveXObject`, `IE_PROTO`, string-split
+  `"javascript:"`), which do look like concealment. Switched to the modern
+  `pdfjs-dist/build` (zero flagged patterns; the legacy shims were dead weight
+  in a Chrome extension anyway) and now ship the UNMINIFIED worker.
+- Webpack minification disabled across all bundles (`optimization.minimize:
+  false`): shipped code is now human-readable end to end. For a privacy
+  product, an auditable dist is a feature; the size cost (~632KiB → ~3.7MB
+  unpacked) is worth it.
+- Worker file renamed `assets/pdf.worker.min.mjs` → `assets/pdf.worker.mjs`;
+  files test stubs the browser globals the modern build expects at import.
+
 ## Unreleased — ships with the Chrome Web Store submission
 
 ### Product rename

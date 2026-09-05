@@ -48,6 +48,11 @@ export default (env, argv) => {
     },
     // pdf.js (lazy chunk) is intentionally large; don't warn on asset size.
     performance: { hints: false },
+    // Ship human-readable code: the Chrome Web Store's Code Readability policy
+    // forbids obfuscation, and for a privacy product, reviewable dist output
+    // IS the product. Bundling without mangling/minification costs some bytes
+    // and buys auditability (reviewers and users can read exactly what runs).
+    optimization: { minimize: false },
     plugins: [
       new CopyWebpackPlugin({
         patterns: [
@@ -62,9 +67,14 @@ export default (env, argv) => {
           { from: 'assets/fonts', to: 'assets/fonts' },
           { from: 'assets/icons', to: 'assets/icons' },
           // pdf.js worker, referenced via chrome.runtime.getURL at runtime.
+          // MODERN build (not legacy): the legacy build bundles IE-era core-js
+          // shims (ActiveXObject / IE_PROTO / string-split "javascript:") that
+          // the Chrome Web Store reviewer flagged as obfuscation. And the
+          // UNMINIFIED file: CWS Code Readability policy — reviewers must be
+          // able to read what ships.
           {
-            from: 'node_modules/pdfjs-dist/legacy/build/pdf.worker.min.mjs',
-            to: 'assets/pdf.worker.min.mjs',
+            from: 'node_modules/pdfjs-dist/build/pdf.worker.mjs',
+            to: 'assets/pdf.worker.mjs',
           },
         ],
       }),

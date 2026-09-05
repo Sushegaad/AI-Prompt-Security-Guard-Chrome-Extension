@@ -10,12 +10,14 @@
  * unit-testable with a mock pdf document (no real pdf.js in tests).
  * ========================================================================== */
 
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
+// Modern build only — the legacy build carries IE-era polyfills that look
+// like obfuscation to store reviewers and are dead weight in an extension.
+import * as pdfjs from 'pdfjs-dist/build/pdf.mjs';
 
 const MAX_PAGES = 50; // cap work on very large PDFs
 
 try {
-  pdfjs.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('assets/pdf.worker.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('assets/pdf.worker.mjs');
 } catch {
   /* not in extension context (tests) */
 }

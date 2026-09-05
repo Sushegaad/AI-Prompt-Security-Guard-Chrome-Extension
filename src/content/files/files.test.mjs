@@ -15,6 +15,16 @@ globalThis.Event = dom.window.Event;
 globalThis.HTMLElement = dom.window.HTMLElement;
 globalThis.chrome = { runtime: { getURL: (p) => 'chrome-extension://test/' + p } };
 
+// The MODERN pdf.js build (we ship it since the legacy build's IE-era shims
+// tripped the Chrome Web Store obfuscation reviewer) touches a few browser
+// globals at import time that neither Node nor jsdom provide. Minimal stubs —
+// the tests only exercise the text-extraction page-walk with a mock document.
+globalThis.DOMMatrix ??= class DOMMatrix {
+  constructor() { this.a = 1; this.b = 0; this.c = 0; this.d = 1; this.e = 0; this.f = 0; }
+};
+globalThis.ImageData ??= class ImageData {};
+globalThis.Path2D ??= class Path2D {};
+
 const { extractDocxText } = await import('./docx.js');
 const { extractFromDoc } = await import('./pdf.js');
 const { fileKind, extractText } = await import('./extract.js');
